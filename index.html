@@ -1,0 +1,3293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A quiet 12-month daily practice tracker for building discipline, emotional clarity, and self-knowledge.">
+<meta name="theme-color" content="#0f0f0f">
+<title>Iroh Protocol</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 220' fill='none' stroke='%23c19a6b' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M72 168 C28 148 8 95 30 52 C52 9 110-2 152 20 C194 42 198 100 168 145 C155 165 135 177 118 178' stroke-width='5' opacity='.85'/%3E%3Cpath d='M68 165 Q68 198 100 205 Q132 198 132 165' stroke-width='4.5'/%3E%3Cpath d='M64 165 L136 165' stroke-width='4.5'/%3E%3Cpath d='M88 158 C83 140 93 128 88 112 C83 96 93 84 88 68' stroke-width='3.5' opacity='.7'/%3E%3Cpath d='M112 158 C117 138 107 126 112 108 C117 90 107 78 112 60' stroke-width='3.5' opacity='.7'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&display=optional" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #252525;
+  --border: #2a2a2a;
+  --text-primary: #d4d4d4;
+  --text-secondary: #777777;
+  --text-tertiary: #4a4a4a;
+  --accent: #c19a6b;
+  --accent-dim: #8b7355;
+  --success: #5a7a5a;
+  --danger: #7a4a4a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+html { scrollbar-color: var(--border) transparent; scrollbar-width: thin; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Lora', 'Georgia', serif;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  /* Subtle warm radial vignette — adds atmospheric depth */
+  background-image: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(193,154,107,0.03) 0%, transparent 70%);
+  background-attachment: fixed;
+}
+
+/* Custom text selection */
+::selection { background: rgba(193,154,107,0.25); color: var(--text-primary); }
+::-moz-selection { background: rgba(193,154,107,0.25); color: var(--text-primary); }
+
+/* ── FOCUS STATES ──────────────────────────────────────── */
+/* Remove default browser ring everywhere */
+*:focus { outline: none; }
+/* Restore only for keyboard navigation */
+*:focus-visible { outline: 2px solid rgba(193,154,107,0.45); outline-offset: 2px; }
+/* Nav tabs: use underline instead of box ring to match their design */
+.nav-tab:focus-visible { outline: none; border-bottom-color: rgba(193,154,107,0.5); color: var(--text-primary); }
+/* Block-level rows: inset ring looks cleaner than outline */
+.check-row:focus-visible { outline: none; box-shadow: inset 0 0 0 1px rgba(193,154,107,0.28), 0 0 0 1px rgba(193,154,107,0.1); }
+/* Circular elements */
+.month-circle:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px rgba(193,154,107,0.4); }
+/* Book-check squares */
+.book-check:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px rgba(193,154,107,0.4); }
+/* Inline chips / words */
+.emotion-word:focus-visible, .theme-tag:focus-visible { outline: 2px solid rgba(193,154,107,0.4); outline-offset: 1px; }
+/* Week columns (clickable cards) */
+.week-col:focus-visible { outline: none; border-color: rgba(193,154,107,0.5); box-shadow: 0 0 0 1px rgba(193,154,107,0.2) inset; }
+
+/* Page fade-in */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.page-shell, .progress-page { animation: fadeIn 0.2s ease-out; }
+
+h1 { font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+h2 { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+h3 { font-size: 13px; font-weight: 400; color: var(--text-secondary); }
+
+/* NAV */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(15,15,15,0.92);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: center; align-items: center; gap: 28px;
+  padding: 8px 24px 0;
+}
+.nav-brand {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--accent);
+  cursor: pointer;
+}
+.nav-tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-secondary); font-family: inherit; font-size: 13px;
+  letter-spacing: 0.06em; padding: 10px 8px 12px; cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  text-transform: uppercase;
+}
+@media (hover: hover) { .nav-tab:hover { color: var(--text-primary); } }
+.nav-tab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+
+/* MAIN CONTENT */
+.content {
+  max-width: 640px; margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* SECTIONS */
+.section { margin-bottom: 32px; }
+.page-shell > .section,
+.progress-page > .section { margin-bottom: 0; }
+.section-header {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-header h2 { margin: 0; }
+.tag {
+  font-size: 11px; color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+.fraction { font-size: 12px; color: var(--text-secondary); margin-left: auto; }
+
+/* CHECKBOX ROWS */
+.check-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 6px 0; cursor: pointer; user-select: none;
+}
+@media (hover: hover) {
+  .check-row:hover .checkbox { border-color: var(--text-secondary); }
+  .check-row:hover { background: rgba(255,255,255,0.015); border-radius: 2px; }
+}
+.checkbox {
+  width: 16px; height: 16px; min-width: 16px;
+  border: 1px solid var(--border); background: transparent;
+  cursor: pointer; flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.checkbox.checked {
+  background: var(--accent); border-color: var(--accent);
+  animation: checkPop 0.2s ease-out;
+}
+.checkbox.checked::after {
+  content: '✓'; color: var(--bg-primary);
+  font-size: 11px; font-weight: 700; line-height: 1;
+}
+@keyframes checkPop { 0% { transform: scale(0.85); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+.check-copy { min-width: 0; }
+.check-label { color: var(--text-primary); }
+.check-label.checked { color: var(--text-secondary); }
+.check-description {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.check-description.checked { color: #5b5b5b; }
+
+/* INPUTS & TEXTAREAS */
+input[type="text"], input[type="date"], textarea {
+  font-family: inherit; font-size: 13px; color: var(--text-primary);
+  background: var(--bg-tertiary); border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px; width: 100%; outline: none;
+  transition: border-color 0.15s ease;
+}
+input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: 0 1px 12px rgba(193,154,107,0.1);
+  background: rgba(193,154,107,0.03);
+}
+textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
+::placeholder { color: var(--text-tertiary); }
+
+/* EMOTIONAL CHECK-IN */
+.checkin-entry {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0 8px 12px; color: var(--text-secondary); font-size: 12px;
+  border-left: 2px solid rgba(193,154,107,0.15);
+  margin-left: 2px;
+  transition: border-color 0.15s ease;
+}
+.checkin-entry:hover { border-left-color: rgba(193,154,107,0.35); }
+.checkin-time { color: var(--accent-dim); min-width: 44px; font-style: italic; }
+.checkin-delete {
+  background: none; border: none; color: var(--text-tertiary);
+  cursor: pointer; font-size: 14px; padding: 0 4px;
+  transition: color 0.15s ease; margin-left: auto;
+}
+.checkin-delete:hover { color: var(--danger); }
+.checkin-input-row { display: flex; gap: 8px; margin-top: 6px; }
+.checkin-input-row input { flex: 1; }
+.log-btn {
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  color: var(--text-secondary); font-family: inherit; font-size: 12px;
+  padding: 6px 14px; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  white-space: nowrap; border-radius: 2px;
+}
+@media (hover: hover) {
+  .log-btn:hover {
+    border-color: var(--accent); color: var(--text-primary);
+    background: rgba(193,154,107,0.06);
+  }
+}
+.log-btn:active { transform: scale(0.96); }
+
+/* EXPANDABLE */
+.expandable-header {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; padding: 8px 0; user-select: none;
+}
+.expandable-header h2 { margin: 0; }
+.chevron {
+  color: var(--text-tertiary); transition: transform 0.15s ease;
+  font-size: 12px;
+}
+.chevron.open { transform: rotate(90deg); }
+.filled-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); margin-left: 8px;
+  box-shadow: 0 0 6px rgba(193,154,107,0.4);
+  animation: dotPulse 3s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(193,154,107,0.3); }
+  50% { box-shadow: 0 0 8px rgba(193,154,107,0.6); }
+}
+.expandable-body { display: none; padding-top: 8px; }
+.expandable-body.open { display: block; }
+.reflection-field { margin-bottom: 16px; }
+.reflection-field label {
+  display: block; color: var(--accent-dim);
+  font-size: 12px; margin-bottom: 8px;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+/* READING BLOCK */
+.reading-block, .challenge-block {
+  padding: 0;
+  border-top: none;
+  color: var(--text-secondary); font-size: 12px;
+}
+.reading-block h3, .challenge-block h3 { margin-bottom: 6px; }
+.challenge-note { margin-top: 8px; }
+.challenge-note textarea { min-height: 40px; font-size: 12px; }
+
+/* DATE NAV */
+.date-nav {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 4px;
+}
+.date-nav h1 {
+  flex: 1;
+  text-transform: none;
+  letter-spacing: 0.03em;
+  font-size: 19px;
+  font-weight: 400;
+  color: transparent;
+  background: linear-gradient(135deg, var(--text-primary), #a09080);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nav-arrow {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 16px; cursor: pointer; padding: 6px 12px;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 2px;
+}
+@media (hover: hover) {
+  .nav-arrow:hover {
+    color: var(--text-primary); border-color: var(--accent);
+    background: rgba(193,154,107,0.06);
+    box-shadow: 0 0 8px rgba(193,154,107,0.1);
+  }
+}
+.nav-arrow:active { transform: scale(0.94); }
+.month-line { color: var(--text-secondary); font-size: 12px; margin-bottom: 4px; }
+.context-line { color: var(--text-tertiary); font-size: 12px; font-style: italic; margin-bottom: 24px; line-height: 1.5; }
+
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.view-hero {
+  padding-bottom: 20px;
+  border-bottom: none;
+  position: relative;
+}
+.view-hero::after {
+  content: '';
+  position: absolute; bottom: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(193,154,107,0.2) 30%, rgba(193,154,107,0.2) 70%, transparent);
+}
+.view-kicker {
+  color: var(--accent-dim);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.view-kicker::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(193,154,107,0.15), transparent 80%);
+}
+.view-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.view-title {
+  color: var(--text-primary);
+  font-size: 18px;
+  letter-spacing: 0.05em;
+}
+.view-glance {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.view-copy {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.75;
+  max-width: 560px;
+  font-style: italic;
+}
+.view-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.view-chip {
+  color: var(--text-secondary);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  padding: 5px 12px;
+  border: 1px solid rgba(193,154,107,0.1);
+  background: linear-gradient(180deg, rgba(193,154,107,0.06), rgba(255,255,255,0) 130%);
+  border-radius: 2px;
+}
+.journal-card {
+  background:
+    linear-gradient(180deg, rgba(193,154,107,0.05), rgba(255,255,255,0) 26%),
+    linear-gradient(180deg, #181716, #141413);
+  border: 1px solid rgba(193,154,107,0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 2px 8px rgba(0,0,0,0.2),
+    0 0 0 0.5px rgba(193,154,107,0.06);
+  padding: 18px 20px 16px;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+@media (hover: hover) {
+  .journal-card:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.03),
+      0 4px 16px rgba(0,0,0,0.25),
+      0 0 0 0.5px rgba(193,154,107,0.1);
+    border-color: rgba(193,154,107,0.18);
+  }
+}
+.journal-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.journal-card-header h2 { margin: 0; }
+.journal-card-note {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.55;
+  margin-top: 5px;
+}
+.journal-card-aside {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* WEEK VIEW */
+.week-nav {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 14px;
+}
+.week-nav-label { flex: 1; text-align: center; font-size: 12px; color: var(--text-secondary); }
+.week-btn {
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+  color: var(--text-secondary); font-family: inherit; font-size: 12px;
+  padding: 6px 12px; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  border-radius: 2px;
+}
+@media (hover: hover) { .week-btn:hover { border-color: var(--accent); color: var(--text-primary); } }
+.week-btn:active { background: rgba(193,154,107,0.06); }
+.week-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 8px; overflow-x: auto;
+}
+.week-col {
+  background: rgba(255,255,255,0.015); padding: 14px 12px;
+  min-width: 84px; cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid var(--border);
+}
+@media (hover: hover) {
+  .week-col:hover {
+    background: var(--bg-tertiary);
+    border-color: rgba(193,154,107,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+}
+.week-col:active { transform: scale(0.98); }
+.week-col.today {
+  border-color: rgba(193,154,107,0.34);
+  background:
+    linear-gradient(180deg, rgba(193,154,107,0.08), rgba(255,255,255,0) 130%),
+    rgba(255,255,255,0.015);
+  box-shadow: 0 0 12px rgba(193,154,107,0.08);
+}
+.week-day { font-size: 12px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+.week-date { font-size: 11px; color: var(--text-tertiary); margin-bottom: 12px; }
+.week-stat { font-size: 11px; color: var(--text-secondary); padding: 2px 0; }
+.week-stat + .week-stat { border-top: 1px solid rgba(255,255,255,0.04); margin-top: 4px; padding-top: 6px; }
+.week-stat .done { color: var(--accent); }
+.week-completion { margin-top: 18px; }
+.week-completion-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.week-bar { height: 4px; background: var(--bg-tertiary); width: 100%; border-radius: 2px; overflow: hidden; }
+.week-bar-fill { height: 100%; background: linear-gradient(90deg, #8b7355, var(--accent)); transition: width 0.3s ease; border-radius: 2px; }
+
+/* PROGRESS VIEW — aliases onto shared components */
+.progress-page { display: flex; flex-direction: column; gap: 20px; }
+/* Alias progress-hero → view-hero */
+.progress-hero { padding-bottom: 20px; border-bottom: none; position: relative; }
+.progress-hero::after { content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 1px; background: linear-gradient(90deg, transparent, rgba(193,154,107,0.2) 30%, rgba(193,154,107,0.2) 70%, transparent); }
+/* Alias progress-kicker → view-kicker */
+.progress-kicker { color: var(--accent-dim); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.progress-kicker::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(193,154,107,0.15), transparent 80%); }
+/* Alias progress-title-row → view-title-row */
+.progress-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+/* Alias progress-title → view-title */
+.progress-title { color: var(--text-primary); font-size: 18px; letter-spacing: 0.05em; }
+/* Alias progress-glance → view-glance */
+.progress-glance { color: var(--text-tertiary); font-size: 11px; white-space: nowrap; }
+/* Alias progress-copy → view-copy */
+.progress-copy { margin-top: 8px; color: var(--text-secondary); font-size: 12px; line-height: 1.7; max-width: 560px; }
+/* Alias progress-chip-row/chip → view-chip-row/chip */
+.progress-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.progress-chip { color: var(--text-secondary); font-size: 11px; letter-spacing: 0.03em; padding: 5px 12px; border: 1px solid rgba(193,154,107,0.1); background: linear-gradient(180deg, rgba(193,154,107,0.06), rgba(255,255,255,0) 130%); border-radius: 2px; }
+/* Alias progress-card → journal-card */
+.progress-card { background: linear-gradient(180deg, rgba(193,154,107,0.05), rgba(255,255,255,0) 26%), linear-gradient(180deg, #181716, #141413); border: 1px solid rgba(193,154,107,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.2), 0 0 0 0.5px rgba(193,154,107,0.06); padding: 18px 20px 16px; transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+@media (hover: hover) { .progress-card:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 16px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(193,154,107,0.1); border-color: rgba(193,154,107,0.18); } }
+/* Alias progress-card-header → journal-card-header */
+.progress-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.progress-card-title h2 { margin: 0; }
+/* Alias progress-card-note → journal-card-note */
+.progress-card-note { color: var(--text-tertiary); font-size: 11px; line-height: 1.55; margin-top: 5px; }
+/* Alias progress-card-aside → journal-card-aside */
+.progress-card-aside { color: var(--text-tertiary); font-size: 11px; text-align: right; white-space: nowrap; }
+.heatmap-wrap { overflow-x: auto; }
+.heatmap { display: flex; gap: 2px; }
+.heatmap-col { display: flex; flex-direction: column; gap: 2px; }
+.heatmap-cell {
+  width: 12px; height: 12px;
+  background: var(--bg-tertiary);
+  position: relative;
+  border-radius: 2px;
+  transition: transform 0.1s ease;
+}
+.heatmap-cell:hover { transform: scale(1.4); z-index: 2; }
+.heatmap-cell.level-1 { background: #2a3a2a; }
+.heatmap-cell.level-2 { background: #3a5a3a; }
+.heatmap-cell.level-3 { background: #4a7a4a; }
+.heatmap-cell.level-4 { background: var(--accent); box-shadow: 0 0 3px rgba(193,154,107,0.3); }
+.heatmap-tooltip {
+  display: none; position: absolute; bottom: 18px; left: 50%;
+  transform: translateX(-50%); background: var(--bg-secondary);
+  border: 1px solid var(--border); padding: 4px 8px;
+  font-size: 10px; white-space: nowrap; z-index: 10;
+  color: var(--text-secondary); pointer-events: none;
+  border-radius: 2px;
+}
+.heatmap-cell:hover .heatmap-tooltip,
+.heatmap-cell.tapped .heatmap-tooltip { display: block; }
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+.heatmap-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--bg-tertiary);
+}
+.heatmap-swatch.level-1 { background: #2a3a2a; }
+.heatmap-swatch.level-2 { background: #3a5a3a; }
+.heatmap-swatch.level-3 { background: #4a7a4a; }
+.heatmap-swatch.level-4 { background: var(--accent); }
+.progress-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 12px;
+}
+.progress-metric {
+  padding: 10px 0 0;
+  border-top: 1px solid var(--border);
+}
+.progress-metric-value {
+  color: var(--accent);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.progress-metric-label {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.progress-subsection-title {
+  color: var(--text-secondary);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+.monthly-circles {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.month-circle {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--border); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-secondary);
+  cursor: pointer; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  background: rgba(255,255,255,0.01);
+}
+.month-circle.completed {
+  background: linear-gradient(135deg, var(--accent), #a07d52);
+  border-color: var(--accent); color: var(--bg-primary);
+  box-shadow: 0 0 8px rgba(193,154,107,0.25);
+  font-weight: 500;
+}
+.month-circle.current {
+  border-color: var(--accent); color: var(--accent);
+  box-shadow: 0 0 10px rgba(193,154,107,0.15);
+  animation: currentMonth 2.5s ease-in-out infinite;
+}
+@keyframes currentMonth {
+  0%, 100% { box-shadow: 0 0 6px rgba(193,154,107,0.12); }
+  50% { box-shadow: 0 0 14px rgba(193,154,107,0.25); }
+}
+@media (hover: hover) { .month-circle:hover { border-color: var(--text-secondary); transform: scale(1.08); } }
+.month-circle:active { transform: scale(0.95); }
+.challenge-expand {
+  background: rgba(255,255,255,0.02); padding: 12px;
+  margin-top: 12px; font-size: 12px; color: var(--text-secondary);
+  line-height: 1.5;
+  border-top: 1px solid var(--border);
+}
+.challenge-expand-title { color: var(--text-primary); margin-bottom: 4px; }
+.training-focus-phase {
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.training-focus-row {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.training-focus-row:first-of-type { border-top: none; padding-top: 0; }
+.training-focus-label {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.training-focus-text {
+  color: #9d968c;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.behavioral-copy {
+  color: #b0a897;
+  font-size: 14px;
+  line-height: 1.85;
+  font-style: italic;
+  max-width: 560px;
+  padding: 12px 0 8px 16px;
+  border-left: 2px solid rgba(193,154,107,0.2);
+}
+.book-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px; font-size: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+  margin-bottom: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.book-row:last-child { margin-bottom: 0; }
+.book-row.current {
+  border-color: rgba(193,154,107,0.34);
+  background:
+    linear-gradient(180deg, rgba(193,154,107,0.07), rgba(255,255,255,0) 130%),
+    rgba(255,255,255,0.015);
+  box-shadow: 0 0 16px rgba(193,154,107,0.06);
+}
+.book-row.past { color: var(--text-tertiary); opacity: 0.78; }
+.book-check {
+  width: 14px; height: 14px; border: 1px solid var(--border); flex-shrink: 0;
+  cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.book-check.done { background: var(--accent); border-color: var(--accent); }
+.book-check.done::after { content: '✓'; color: var(--bg-primary); font-size: 9px; font-weight: 700; line-height: 1; }
+.book-check.current-book { border-color: var(--accent); box-shadow: 0 0 4px rgba(193,154,107,0.25); }
+.book-check:hover { border-color: var(--accent); }
+.reading-progress-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px;
+}
+.book-main { flex: 1; min-width: 0; }
+.book-stage {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent-dim);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.book-stage.completed { color: var(--text-tertiary); }
+.book-stage.up-next { color: #8b8377; }
+.book-input-row, .book-date-row {
+  display: flex; gap: 8px; align-items: center;
+}
+.book-date-row { margin-top: 5px; gap: 6px; }
+.book-edit {
+  background: none; border: none; border-bottom: 1px solid var(--border);
+  font-family: inherit; font-size: 12px; color: inherit;
+  width: 100%; padding: 2px 0; cursor: text; outline: none;
+  transition: border-color 0.15s ease;
+}
+.book-edit:focus { border-bottom-color: var(--accent); background: var(--bg-tertiary); padding: 2px 4px; }
+.book-date { font-size: 11px; color: var(--text-tertiary); max-width: 90px; }
+.book-meta {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.book-cover-shell {
+  width: 68px; min-width: 68px; aspect-ratio: 2 / 3;
+  border: 1px solid var(--border); background: var(--bg-tertiary);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.book-cover-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.book-cover-placeholder {
+  font-size: 10px; color: var(--text-tertiary);
+  text-align: center; line-height: 1.4; padding: 6px;
+}
+/* Loading shimmer */
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+.book-cover-shell.cover-loading::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(193,154,107,0.08) 50%, transparent 100%);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+.book-meta-copy { flex: 1; min-width: 0; }
+.book-description {
+  color: var(--text-secondary); line-height: 1.55;
+  display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5; overflow: hidden;
+}
+.book-description.empty {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+.book-meta-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 8px;
+}
+.book-meta-status {
+  color: var(--text-tertiary); font-size: 11px;
+}
+.book-meta-status.success { color: var(--accent-dim); }
+.book-meta-status.error { color: #b78585; }
+.book-action-btn,
+.book-meta-refresh {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-tertiary); font-family: inherit; font-size: 11px;
+  padding: 4px 10px; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+@media (hover: hover) {
+  .book-action-btn:hover,
+  .book-meta-refresh:hover { border-color: var(--accent); color: var(--text-primary); }
+}
+.book-action-btn:active,
+.book-meta-refresh:active { transform: scale(0.96); }
+.book-meta-refresh:disabled { opacity: 0.65; cursor: default; }
+
+/* REFLECTIONS VIEW */
+.search-input {
+  margin-bottom: 0;
+}
+.reflection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.reflection-entry-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.reflection-entry {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  border-left: 2px solid rgba(193,154,107,0.2);
+  padding-left: 16px;
+}
+/* Reflection entries are not interactive — suppress the journal-card hover */
+.reflection-entry:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 2px 8px rgba(0,0,0,0.2),
+    0 0 0 0.5px rgba(193,154,107,0.06);
+  border-color: rgba(193,154,107,0.12);
+  cursor: default;
+}
+.reflection-date { font-size: 14px; font-weight: 500; letter-spacing: 0.04em; color: var(--accent); }
+.reflection-meta {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.reflection-q { color: var(--accent-dim); font-size: 11px; margin-bottom: 3px; font-style: italic; }
+.reflection-a { color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
+.reflection-checkins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.reflection-checkin {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+
+/* SETUP */
+.setup-shell {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.setup-shell::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 30%, rgba(193,154,107,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.setup {
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: setupReveal 0.6s ease-out;
+}
+@keyframes setupReveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.setup h1 { font-size: 20px; font-weight: 400; letter-spacing: 0.04em; text-transform: none; }
+.setup-copy {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+  font-style: italic;
+}
+.setup input[type="date"] { max-width: 220px; text-align: center; margin: 0 auto; }
+.begin-btn {
+  background: linear-gradient(135deg, var(--accent), #a07d52);
+  border: none;
+  color: var(--bg-primary); font-family: inherit;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 36px; cursor: pointer;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 2px 12px rgba(193,154,107,0.2);
+}
+@media (hover: hover) { .begin-btn:hover { box-shadow: 0 4px 20px rgba(193,154,107,0.35); transform: translateY(-1px); } }
+.begin-btn:active { transform: scale(0.98); box-shadow: 0 1px 8px rgba(193,154,107,0.2); }
+
+/* EXPORT/IMPORT */
+.export-row {
+  display: flex; gap: 16px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.export-link {
+  color: var(--text-tertiary); cursor: pointer;
+  text-decoration: none; background: none; border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-family: inherit; font-size: 12px;
+  padding-bottom: 1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+@media (hover: hover) { .export-link:hover { color: var(--text-secondary); border-bottom-color: rgba(255,255,255,0.15); } }
+.export-link:active { color: var(--accent-dim); }
+#import-file { display: none; }
+
+/* FUTURE DATE */
+.future-msg {
+  color: var(--text-secondary); font-size: 15px;
+  text-align: center; padding: 8px 0 4px;
+  letter-spacing: 0.05em;
+}
+.future-note {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Return-to-today pill */
+.return-today {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(193,154,107,0.08);
+  border: 1px solid rgba(193,154,107,0.18);
+  color: var(--accent-dim); font-family: inherit;
+  font-size: 11px; letter-spacing: 0.04em;
+  padding: 5px 14px; cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  margin-top: 10px;
+}
+@media (hover: hover) { .return-today:hover { background: rgba(193,154,107,0.14); color: var(--accent); border-color: rgba(193,154,107,0.3); } }
+.return-today:active { transform: scale(0.97); }
+
+/* DAILY VIEW */
+.daily-card .section-header { margin-bottom: 8px; }
+.daily-card .check-row { padding: 10px 0; }
+.daily-card .check-row + .check-row { border-top: 1px solid rgba(255,255,255,0.04); }
+.daily-card .checkin-entry + .checkin-entry { border-top: 1px solid rgba(255,255,255,0.04); }
+.daily-card .expandable-header { padding: 0; }
+.daily-card .expandable-body { padding-top: 12px; }
+.daily-card .reflection-field:last-child { margin-bottom: 0; }
+.daily-card .section-header .fraction { color: var(--accent-dim); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .content { padding: 24px 16px 60px; }
+  body { font-size: 12px; }
+  .nav {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0 18px;
+    padding: 8px 16px 0;
+  }
+  .nav-brand {
+    width: 100%;
+    margin-right: 0;
+    padding-bottom: 4px;
+  }
+  .week-col { min-width: 60px; padding: 8px 4px; }
+  .view-title-row,
+  .journal-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .view-glance,
+  .journal-card-aside {
+    white-space: normal;
+    text-align: left;
+  }
+  .progress-title-row,
+  .progress-card-header,
+  .reading-progress-header { flex-direction: column; align-items: flex-start; }
+  .progress-glance,
+  .progress-card-aside { white-space: normal; text-align: left; }
+  .progress-metrics { grid-template-columns: 1fr; }
+  .training-focus-row { grid-template-columns: 1fr; gap: 4px; }
+  .book-input-row, .book-date-row, .book-meta { flex-direction: column; align-items: stretch; }
+  .book-meta-row { align-items: flex-start; }
+  .book-cover-shell { width: 84px; min-width: 84px; }
+  .reflection-entry-header { flex-direction: column; align-items: flex-start; }
+  .habit-bar-label { min-width: 110px; font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .content { padding: 16px 12px 56px; }
+  .nav { gap: 0 12px; padding: 6px 12px 0; }
+  .nav-wordmark { display: none; }
+  .week-col { min-width: 44px; padding: 6px 2px; font-size: 10px; }
+  .week-day { font-size: 11px; }
+  .week-stat { font-size: 10px; }
+  .heatmap-cell { width: 10px; height: 10px; }
+  .habit-bar-label { min-width: 84px; font-size: 10px; }
+  .book-cover-shell { width: 60px; min-width: 60px; }
+  .progress-metrics { grid-template-columns: 1fr 1fr; }
+  .date-nav h1 { font-size: 15px; }
+  .view-title { font-size: 15px; }
+  .monthly-circles { gap: 5px; }
+  .month-circle { width: 26px; height: 26px; font-size: 10px; }
+}
+
+/* EMOTION SCAFFOLD */
+.emotion-scaffold { margin-top: 8px; }
+.emotion-toggle {
+  background: none; border: none; color: var(--text-tertiary);
+  font-family: inherit; font-size: 11px; cursor: pointer;
+  padding: 2px 0; transition: color 0.15s ease;
+}
+.emotion-toggle:hover { color: var(--text-secondary); }
+.emotion-grid {
+  display: none; flex-wrap: wrap; gap: 6px;
+  padding: 10px 0 4px;
+}
+.emotion-grid.open { display: flex; }
+.emotion-group-label {
+  width: 100%; font-size: 10px; color: var(--text-tertiary);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-top: 10px; margin-bottom: 4px;
+  padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.04);
+}
+.emotion-group-label:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.emotion-word {
+  font-size: 11px; color: var(--text-secondary);
+  background: var(--bg-tertiary); padding: 3px 8px;
+  cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  border: 1px solid transparent;
+}
+/* Quadrant tinting — subtle affect-model color coding */
+.emotion-group[data-quadrant="high-difficult"] .emotion-word { background: rgba(180, 80, 80, 0.08); border-color: rgba(180, 80, 80, 0.06); }
+.emotion-group[data-quadrant="low-difficult"] .emotion-word { background: rgba(100, 100, 160, 0.08); border-color: rgba(100, 100, 160, 0.06); }
+.emotion-group[data-quadrant="high-pleasant"] .emotion-word { background: rgba(180, 160, 60, 0.08); border-color: rgba(180, 160, 60, 0.06); }
+.emotion-group[data-quadrant="low-pleasant"] .emotion-word { background: rgba(90, 160, 120, 0.08); border-color: rgba(90, 160, 120, 0.06); }
+@media (hover: hover) { .emotion-word:hover { border-color: var(--accent); color: var(--text-primary); } }
+.emotion-word:active { transform: scale(0.96); background: rgba(193,154,107,0.1) !important; border-color: rgba(193,154,107,0.3) !important; }
+
+/* HABIT BREAKDOWN BARS */
+.habit-bars { margin-top: 12px; }
+.habit-bar-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 0; font-size: 11px;
+}
+.habit-bar-label { color: var(--text-secondary); min-width: 124px; text-align: left; }
+.habit-bar-track { flex: 1; height: 5px; background: var(--bg-tertiary); border-radius: 999px; overflow: hidden; }
+.habit-bar-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; border-radius: 999px; }
+.habit-bar-fill.low { background: linear-gradient(90deg, #7a5a3a, var(--accent)); }
+.habit-bar-pct { color: var(--text-tertiary); min-width: 36px; font-size: 11px; text-align: right; }
+.habit-bar-pct.low { color: #a08060; }
+
+/* THEME TAGS */
+.theme-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.theme-tag {
+  font-size: 11px; color: var(--text-secondary);
+  background: var(--bg-tertiary); padding: 4px 12px;
+  cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+@media (hover: hover) {
+  .theme-tag:hover {
+    border-color: var(--accent); color: var(--text-primary);
+    background: rgba(193,154,107,0.06);
+    transform: translateY(-1px);
+  }
+}
+.theme-tag:active { transform: scale(0.97); }
+.theme-tag.active {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(193,154,107,0.1);
+  box-shadow: 0 0 8px rgba(193,154,107,0.12);
+}
+
+/* WEEKLY INTEGRATION */
+.weekly-integration .reflection-field { margin-bottom: 12px; }
+.reflection-q-wi { margin-top: 8px; }
+
+/* UTILITY */
+.text-tertiary-sm { color: var(--text-tertiary); font-size: 12px; }
+.checkin-complete { color: var(--text-tertiary); font-size: 12px; padding: 4px 0; }
+.book-sep { color: var(--text-tertiary); flex-shrink: 0; }
+.book-arr { color: var(--text-tertiary); flex-shrink: 0; font-size: 11px; }
+.no-data-note { color: var(--text-tertiary); padding: 16px 0; text-align: center; font-style: italic; font-size: 12px; }
+
+/* LOGO */
+.logo-mark {
+  display: block;
+  margin: 0 auto;
+}
+.logo-mark svg {
+  display: block;
+}
+.logo-setup {
+  width: 100px; height: 110px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 20px rgba(193,154,107,0.15));
+  animation: logoReveal 1s ease-out 0.1s both;
+}
+@keyframes logoReveal {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.logo-nav {
+  width: 22px; height: 24px;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+.nav-wordmark {
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+.nav-brand:hover .logo-nav,
+.nav-brand:hover .nav-wordmark {
+  opacity: 1;
+}
+.logo-empty {
+  width: 64px; height: 70px;
+  opacity: 0.08;
+  margin: 24px auto 16px;
+}
+.logo-footer {
+  width: 32px; height: 35px;
+  opacity: 0.12;
+  margin: 8px auto 0;
+}
+</style>
+</head>
+<body>
+
+<div class="nav" id="nav" style="display:none;">
+  <div class="nav-brand" id="nav-logo" aria-label="Protocol Iroh home">
+    <div class="logo-mark logo-nav" style="color:var(--accent)"><svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M72 168 C28 148 8 95 30 52 C52 9 110-2 152 20 C194 42 198 100 168 145 C155 165 135 177 118 178" stroke-width="5.5" opacity=".75"/>
+      <path d="M68 165 Q68 198 100 205 Q132 198 132 165" stroke-width="5"/>
+      <path d="M64 165 L136 165" stroke-width="5"/>
+      <path d="M88 158 C83 140 93 128 88 112 C83 96 93 84 88 68" stroke-width="4" opacity=".6"/>
+      <path d="M112 158 C117 138 107 126 112 108 C117 90 107 78 112 60" stroke-width="4" opacity=".6"/>
+    </svg></div>
+    <div class="nav-wordmark">Protocol Iroh</div>
+  </div>
+  <button class="nav-tab active" data-view="daily">Today</button>
+  <button class="nav-tab" data-view="week">Week</button>
+  <button class="nav-tab" data-view="progress">Progress</button>
+  <button class="nav-tab" data-view="reflections">Reflections</button>
+</div>
+
+<div class="content" id="app"></div>
+
+<script>
+// ── LOGO ──
+function logoSVG(cls) {
+  return `<div class="logo-mark ${cls || ''}"><svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M72 168 C28 148 8 95 30 52 C52 9 110-2 152 20 C194 42 198 100 168 145 C155 165 135 177 118 178" stroke-width="4.5" opacity=".75"/>
+    <path d="M68 165 Q68 198 100 205 Q132 198 132 165" stroke-width="4"/>
+    <path d="M64 165 L136 165" stroke-width="4"/>
+    <path d="M88 158 C83 140 93 128 88 112 C83 96 93 84 88 68" stroke-width="3" opacity=".6"/>
+    <path d="M112 158 C117 138 107 126 112 108 C117 90 107 78 112 60" stroke-width="3" opacity=".6"/>
+  </svg></div>`;
+}
+
+// ── DATA ──
+const STORAGE_KEY = 'iroh_protocol_data';
+
+const monthContext = {
+  1: "Novelty phase. High motivation. Enjoy it \u2014 but don't trust it. It's not discipline yet, it's enthusiasm.",
+  2: "The resistance. Motivation drops. The routines feel mechanical. This is the most important month. Most people quit here.",
+  3: "The valley. You may feel more emotionally volatile than before. This is a positive sign \u2014 you're feeling things you previously suppressed. Stay the course.",
+  4: "Stabilization. The routines start to feel like yours, not like something you're performing.",
+  5: "First integration. You'll notice the gap between stimulus and response in real time \u2014 not just in review.",
+  6: "First integration continues. A new kind of confidence that doesn't need to announce itself.",
+  7: "Deepening. The practices become a genuine source of pleasure, not obligation.",
+  8: "Deepening continues. You're becoming someone you didn't plan. The archetype is a compass, not a mould.",
+  9: "Generativity. You begin to orient outward. Others start coming to you \u2014 for advice, for steadiness, for presence.",
+  10: "Generativity continues. The shift from self-construction to contribution.",
+  11: "Integration. Not completion \u2014 the work is permanent. But the foundation is built.",
+  12: "Integration. You stop thinking about 'becoming' anything. You are simply operating from a broader base."
+};
+
+const monthlyChallenges = {
+  1: "Eat alone at a restaurant. No phone.",
+  2: "Have a conversation with someone you'd normally avoid \u2014 a stranger, someone intimidating, someone you disagree with. Seek to understand, not to persuade.",
+  3: "24-hour fast (water only).",
+  4: "Write a letter to someone you've wronged. Send it or don't \u2014 the writing is the practice.",
+  5: "Spend a full day in silence. No speech, no texting, no social media.",
+  6: "Do something you're bad at in public \u2014 dance class, open mic, art class.",
+  7: "Cold immersion \u2014 lake, river, or ice bath. 2 minutes minimum.",
+  8: "Revisit the letter from month 4. Write another if needed.",
+  9: "Mentor someone. Teach a skill you have to someone who wants it.",
+  10: "Spend 48 hours without any screen.",
+  11: "Have a difficult conversation you've been postponing.",
+  12: "Sit with your journal from the past year. Read it cover to cover. Write a single page: who were you, who are you now, what remains."
+};
+
+const readingList = [
+  { id: 1, title: "Meditations", author: "Marcus Aurelius", translation: "Hays", months: "1\u20132", instruction: "One entry per morning. Open to any page." },
+  { id: 2, title: "Tao Te Ching", author: "Lao Tzu", translation: "Mitchell", months: "2\u20133", instruction: "One chapter per morning. 81 short chapters." },
+  { id: 3, title: "The Body Keeps the Score", author: "Bessel van der Kolk", translation: null, months: "3\u20134", instruction: "One chapter per week." },
+  { id: 4, title: "Man's Search for Meaning", author: "Viktor Frankl", translation: null, months: "5", instruction: "Read in two sittings." },
+  { id: 5, title: "The Analects", author: "Confucius", translation: "Slingerland", months: "6\u20137", instruction: "One section per week with Sunday study." },
+  { id: 6, title: "Letting Go", author: "David Hawkins", translation: null, months: "7\u20138", instruction: "Practice the technique as you encounter it." },
+  { id: 7, title: "The Master and His Emissary", author: "Iain McGilchrist", translation: null, months: "9\u201312", instruction: "Long book. No rush. It's the capstone." }
+];
+
+function normalizeReadingBook(book, fallbackId) {
+  return {
+    id: parseInt(book.id, 10) || fallbackId,
+    title: typeof book.title === 'string' ? book.title : '',
+    author: typeof book.author === 'string' ? book.author : '',
+    translation: typeof book.translation === 'string' ? book.translation : null,
+    months: typeof book.months === 'string' ? book.months : '',
+    instruction: typeof book.instruction === 'string' ? book.instruction : '',
+    startDate: typeof book.startDate === 'string' ? book.startDate : '',
+    endDate: typeof book.endDate === 'string' ? book.endDate : ''
+  };
+}
+
+function createDefaultReadingBooks() {
+  return readingList.map((book, index) => normalizeReadingBook(book, index + 1));
+}
+
+const trainingFocus = {
+  1: {
+    phase: "Bodyweight Foundations",
+    focus: "Build the habit of three strength sessions a week and make every rep look the same.",
+    session: "Do 3 sessions with 2-4 sets each of push-ups, squats, rows, and planks. Stop while form is still clean.",
+    progression: "Add 1-2 reps per set before making the variation harder.",
+    recovery: "Leave 1-2 reps in reserve and keep off days easy enough that the next session feels welcome."
+  },
+  2: {
+    phase: "Bodyweight Foundations",
+    focus: "Increase total work slightly without turning training into a grind.",
+    session: "Keep the same 3 weekly sessions and add one extra set only if recovery and technique still feel steady.",
+    progression: "Progress reps first, then leverage or tempo. Do not chase failure.",
+    recovery: "If soreness hangs around for more than two days, hold volume steady for a week."
+  },
+  3: {
+    phase: "Barbell Introduction",
+    focus: "Learn the main lifts with repeatable setup, range, and bar path.",
+    session: "Do 3 sessions and alternate squat, press, and row with squat, bench, and deadlift. Keep the load light enough to move cleanly.",
+    progression: "Add small jumps only when every working set stays technically sound.",
+    recovery: "Film a set or slow down the first rep instead of adding weight too fast."
+  },
+  4: {
+    phase: "Barbell Introduction",
+    focus: "Turn technique into a stable routine and make the bar feel familiar.",
+    session: "Stay with 3 sessions and use the same warm-up pattern before each working set so every lift starts the same way.",
+    progression: "Add 2.5-5 lb when the previous session felt crisp. Repeat the load when it did not.",
+    recovery: "Protect sleep and appetite now that external load is rising."
+  },
+  5: {
+    phase: "Linear Progression",
+    focus: "Build strength through small, repeatable increases instead of dramatic sessions.",
+    session: "Run 3 sessions centered on squat, press or bench, row, and deadlift with 3-5 working sets on the main lifts.",
+    progression: "Add a small amount to the bar each session if all planned reps were honest and controlled.",
+    recovery: "Rest 2-4 minutes between hard sets so quality stays high."
+  },
+  6: {
+    phase: "Linear Progression",
+    focus: "Keep momentum while managing fatigue before it starts to leak into everything else.",
+    session: "Keep the same 3-session structure and keep assistance work minimal so recovery goes to the basics.",
+    progression: "If bar speed drops for multiple sessions, repeat the load once before trying to move up again.",
+    recovery: "Use one lighter walk or mobility day between sessions instead of adding extra lifting."
+  },
+  7: {
+    phase: "Linear Progression",
+    focus: "Protect consistency and make strength work feel ordinary rather than dramatic.",
+    session: "Do 3 sessions and prioritize the first two compound lifts of the day. Treat anything after that as optional.",
+    progression: "Add load only when the last rep still looks like the first.",
+    recovery: "End sessions with a little left in the tank so next week is easy to repeat."
+  },
+  8: {
+    phase: "Linear Progression",
+    focus: "Consolidate gains and stop confusing variety with progress.",
+    session: "Repeat the same main movements for 3 sessions and keep a short training log so you can see what is actually moving upward.",
+    progression: "Use the smallest jump available. Stable progress beats frequent stalls.",
+    recovery: "If motivation dips, shorten the session but still complete the main work."
+  },
+  9: {
+    phase: "Intermediate Structure",
+    focus: "Shift from session-to-session jumps to week-to-week progress.",
+    session: "Train 3-4 times a week and give your main lifts a heavy, moderate, and lighter exposure across the week.",
+    progression: "Improve one variable each week: load, reps, or bar speed.",
+    recovery: "Hard days should feel hard, which means easy days need to stay easy."
+  },
+  10: {
+    phase: "Intermediate Structure",
+    focus: "Train with more intention and stop maxing out your recovery budget.",
+    session: "Use 3-4 sessions and let one lift lead the week while the others stay at maintenance or moderate volume.",
+    progression: "Plan increases weekly rather than daily, and take smaller jumps than you think you need.",
+    recovery: "If two lifts stall at once, trim volume slightly before changing everything."
+  },
+  11: {
+    phase: "Intermediate Structure",
+    focus: "Balance strength gains with durability so the system still feels sustainable.",
+    session: "Keep the main lifts first, then add a small amount of accessory work only for obvious weak points.",
+    progression: "Push the lifts that are responding and hold steady elsewhere.",
+    recovery: "Protect your joints with full range, controlled lowering, and one easier week if fatigue keeps climbing."
+  },
+  12: {
+    phase: "Intermediate Structure",
+    focus: "Finish the year with steadiness and clear proof of what has become normal.",
+    session: "Run the same 3-4 session structure you could realistically keep after the protocol ends.",
+    progression: "Choose conservative weekly increases and value repeatability over testing.",
+    recovery: "Use this month to leave yourself a sustainable next step, not a dramatic finish."
+  }
+};
+
+const emotionWords = [
+  { label: "high energy \u00b7 difficult", words: ["angry","anxious","frustrated","overwhelmed","agitated","panicked","irritated","restless","hostile","terrified","manic","defensive"] },
+  { label: "low energy \u00b7 difficult", words: ["sad","disappointed","lonely","empty","numb","hopeless","guilty","ashamed","resigned","hollow","depleted","apathetic","melancholic"] },
+  { label: "high energy \u00b7 pleasant", words: ["excited","inspired","energized","alive","eager","passionate","elated","curious","amused","proud","playful","determined"] },
+  { label: "low energy \u00b7 pleasant", words: ["calm","peaceful","content","grateful","tender","gentle","serene","steady","grounded","warm","safe","relieved","settled"] }
+];
+
+const meditationProgression = {
+  1: {
+    technique: "focused attention",
+    description: "Count each exhale from 1 to 10, then start over. When you lose count, begin again at 1. The practice is the returning, not the counting."
+  },
+  2: {
+    technique: "body-anchored awareness",
+    description: "Rest attention on physical sensations \u2014 the weight of your hands, the rhythm of breath in your chest. When the mind pulls away, return to the body. You\u2019re building a home base."
+  },
+  3: {
+    technique: "open awareness",
+    description: "Sit with open awareness \u2014 no object, no anchor. Let whatever arises pass without engagement. The point is not calm, but a little more space between impulse and action."
+  }
+};
+
+function getMeditationStage(month) {
+  if (month <= 3) return 1;
+  if (month <= 6) return 2;
+  return 3;
+}
+
+function getReflectionThemes(days, startDate, todayDate) {
+  const stopWords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','is','was','are','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','need','must','i','me','my','we','us','our','you','your','he','him','his','she','her','it','its','they','them','their','that','this','these','those','what','which','who','whom','when','where','why','how','not','no','nor','so','if','then','than','too','very','just','about','up','out','into','over','after','before','between','through','during','above','below','each','all','both','few','more','most','some','such','only','own','same','also','back','still','even','again','there','here','now','well','like','really','much','quite','thing','things','something','nothing','everything','always','never','often','sometimes','today','yesterday','tomorrow','don','didn','doesn','wasn','won','isn','aren','weren','couldn','shouldn','wouldn','haven','hasn','hadn','going','been','being','having','doing','got','get','getting','know','think','feel','felt','want','went','going','make','made','said','say','tell','told','let','see','saw','come','came','take','took','give','gave','keep','kept','find','found','put','seem','seemed','work','day','time','way','lot','bit','little','many','people','one','two','first','last','long','new','old','good','bad','right','left','big','small','try','tried','because','instead','respond','avoid','react','reacted','avoided','grateful','didn\'t','create','week','morning','evening']);
+  const wordCounts = {};
+  const cutoff = addDays(todayDate, -30);
+
+  Object.keys(days).forEach(ds => {
+    if (ds < cutoff || ds > todayDate || ds < startDate) return;
+    const dayData = days[ds];
+    const ref = dayData.eveningReflection || {};
+    const checkins = dayData.emotionalCheckins || [];
+    const wi = dayData.weeklyIntegration || {};
+    const allText = [ref.reacted, ref.avoided, ref.grateful, wi.pattern, wi.learning, wi.carryForward, ...checkins.map(c => c.label)].filter(Boolean).join(' ');
+    const words = allText.toLowerCase().replace(/[^a-z\s'-]/g, '').split(/\s+/).filter(w => w.length > 2 && !stopWords.has(w));
+    words.forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; });
+  });
+
+  return Object.entries(wordCounts)
+    .filter(([, c]) => c >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([word, count]) => ({ word, count }));
+}
+
+const BOOK_DESCRIPTION_LENGTH = 240;
+const BOOK_LOOKUP_SOURCE = 'Open Library';
+const BOOK_DESCRIPTION_FALLBACK_SOURCE = 'Google Books';
+const BOOK_LOOKUP_SERVICES = `${BOOK_LOOKUP_SOURCE} and ${BOOK_DESCRIPTION_FALLBACK_SOURCE}`;
+const BOOK_METADATA_LOOKUP_VERSION = 2;
+const bookLookupRuntime = {};
+
+function getBookForMonth(month) {
+  if (month <= 2) return 1;
+  if (month <= 3) return 2;
+  if (month <= 4) return 3;
+  if (month === 5) return 4;
+  if (month <= 7) return 5;
+  if (month <= 8) return 6;
+  return 7;
+}
+
+function getCurrentMonth(startDate) {
+  const start = new Date(startDate + 'T00:00:00');
+  const now = new Date();
+  const diffMs = now - start;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.min(12, Math.max(1, Math.floor(diffDays / 30) + 1));
+}
+
+function getTodayPractice(dayOfWeek) {
+  const map = {
+    0: {
+      type: "philosophy",
+      label: "Philosophy Study",
+      sublabel: "Deep read + written reflection",
+      duration: "60 min",
+      description: "Spend 60 minutes reading one substantial section and writing a short reflection afterward. Write a few lines so the reading becomes thought, not consumption."
+    },
+    1: {
+      type: "strength",
+      label: "Strength Training",
+      sublabel: "Compound lifts",
+      duration: "45 min",
+      description: "Do 45 minutes of compound lifts with 3-5 working sets across your main movements. The goal is not drama but repeated proof that you can carry load well."
+    },
+    2: {
+      type: "walk",
+      label: "Silent Walk",
+      sublabel: "No headphones, no destination",
+      duration: "30 min",
+      description: "Walk for 30 minutes without headphones, podcasts, or a destination goal. Let your thoughts settle at the pace of your body."
+    },
+    3: {
+      type: "strength",
+      label: "Strength Training",
+      sublabel: "Compound lifts",
+      duration: "45 min",
+      description: "Do 45 minutes of compound lifts with 3-5 working sets across your main movements. The goal is not drama but repeated proof that you can carry load well."
+    },
+    4: {
+      type: "craft",
+      label: "Craft Practice",
+      sublabel: "Hands-on skill, no audience",
+      duration: "45 min",
+      description: "Spend 45 minutes on one hands-on skill with no posting, sharing, or audience in mind. Skill deepens when your hands work quietly for their own sake."
+    },
+    5: {
+      type: "strength",
+      label: "Strength Training",
+      sublabel: "Compound lifts",
+      duration: "45 min",
+      description: "Do 45 minutes of compound lifts with 3-5 working sets across your main movements. The goal is not drama but repeated proof that you can carry load well."
+    },
+    6: {
+      type: "solitude",
+      label: "Extended Solitude + Nature",
+      sublabel: "Hike, water, forest \u2014 no phone",
+      duration: "90 min",
+      description: "Spend 90 minutes outside without your phone, ideally near water, trees, or open space. Let boredom pass so attention can widen again."
+    }
+  };
+  return map[dayOfWeek];
+}
+
+// ── STATE ──
+let state = null;
+let activeView = 'daily';
+let viewDate = todayStr();
+let weekOffset = 0;
+let pendingBookFocusId = null;
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function dateFromStr(s) {
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function formatDateLong(s) {
+  const d = dateFromStr(s);
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatDateShort(s) {
+  const d = dateFromStr(s);
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' });
+}
+
+function addDays(dateStr, n) {
+  const d = dateFromStr(dateStr);
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function isFuture(dateStr) {
+  return dateStr > todayStr();
+}
+
+function normalizeStateShape(rawState) {
+  const next = rawState && typeof rawState === 'object' ? rawState : {};
+  if (!next.days || typeof next.days !== 'object') next.days = {};
+  if (!next.monthlyChallenges || typeof next.monthlyChallenges !== 'object') next.monthlyChallenges = {};
+  for (let i = 1; i <= 12; i++) {
+    const month = next.monthlyChallenges[i] || {};
+    next.monthlyChallenges[i] = {
+      completed: !!month.completed,
+      note: typeof month.note === 'string' ? month.note : ''
+    };
+  }
+  if (!next.reading || typeof next.reading !== 'object') next.reading = {};
+  next.reading.notes = typeof next.reading.notes === 'string' ? next.reading.notes : '';
+  if (!next.reading.customBooks || typeof next.reading.customBooks !== 'object') next.reading.customBooks = {};
+  if (!Array.isArray(next.reading.books)) {
+    next.reading.books = createDefaultReadingBooks().map(baseBook => {
+      const custom = next.reading.customBooks[baseBook.id] || {};
+      return normalizeReadingBook({
+        ...baseBook,
+        title: custom.title !== undefined ? custom.title : baseBook.title,
+        author: custom.author !== undefined ? custom.author : baseBook.author,
+        startDate: custom.startDate || '',
+        endDate: custom.endDate || ''
+      }, baseBook.id);
+    });
+  } else {
+    let nextId = 1;
+    const seenIds = new Set();
+    next.reading.books = next.reading.books.map((book, index) => {
+      const normalized = normalizeReadingBook(book, index + 1);
+      if (!normalized.id || seenIds.has(normalized.id)) {
+        while (seenIds.has(nextId)) nextId++;
+        normalized.id = nextId;
+      }
+      seenIds.add(normalized.id);
+      return normalized;
+    });
+  }
+  if (!next.reading.bookMeta || typeof next.reading.bookMeta !== 'object') next.reading.bookMeta = {};
+  const validBookIds = new Set(next.reading.books.map(book => book.id));
+  Object.keys(next.reading.bookMeta).forEach(id => {
+    if (!validBookIds.has(parseInt(id, 10))) {
+      delete next.reading.bookMeta[id];
+      return;
+    }
+    const meta = next.reading.bookMeta[id] || {};
+    next.reading.bookMeta[id] = {
+      lookupKey: typeof meta.lookupKey === 'string' ? meta.lookupKey : '',
+      coverUrl: typeof meta.coverUrl === 'string' ? meta.coverUrl : '',
+      description: typeof meta.description === 'string' ? meta.description : '',
+      status: typeof meta.status === 'string' ? meta.status : '',
+      source: typeof meta.source === 'string' ? meta.source : '',
+      error: typeof meta.error === 'string' ? meta.error : '',
+      fetchedAt: typeof meta.fetchedAt === 'string' ? meta.fetchedAt : '',
+      lookupVersion: Number.isFinite(meta.lookupVersion) ? meta.lookupVersion : 0
+    };
+  });
+  const currentBookId = parseInt(next.reading.currentBook, 10);
+  next.reading.currentBook = validBookIds.has(currentBookId) ? currentBookId : (next.reading.books[0] ? next.reading.books[0].id : null);
+  return next;
+}
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try { return normalizeStateShape(JSON.parse(raw)); } catch(e) {}
+  }
+  return null;
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/**
+ * Centralised state mutation.
+ * `mutator(state)` is the only place allowed to touch `state`.
+ * After the mutator runs we always persist and, by default, re-render.
+ *
+ * Options:
+ *   render  – call render() after save  (default true)
+ *   silent  – skip save AND render       (default false)
+ */
+function commit(mutator, opts = {}) {
+  mutator(state);
+  if (opts.silent) return;
+  save();
+  if (opts.render !== false) render();
+}
+
+function ensureDay(dateStr) {
+  if (!state.days[dateStr]) {
+    const dow = dateFromStr(dateStr).getDay();
+    const practice = getTodayPractice(dow);
+    state.days[dateStr] = {
+      morning: {
+        noPhone: false, coldExposure: false, breathwork: false,
+        meditation: false, journaling: false, philosophyRead: false
+      },
+      evening: { dailyReview: false, bodyScan: false },
+      emotionalCheckins: [],
+      eveningReflection: { reacted: '', avoided: '', grateful: '' },
+      weeklyPractice: { completed: false, type: practice.type }
+    };
+    if (dow === 0) {
+      state.days[dateStr].weeklyIntegration = { pattern: '', learning: '', carryForward: '' };
+    }
+  }
+  // Ensure weeklyIntegration exists for Sundays (backfill for days created before this feature)
+  const dow = dateFromStr(dateStr).getDay();
+  if (dow === 0 && !state.days[dateStr].weeklyIntegration) {
+    state.days[dateStr].weeklyIntegration = { pattern: '', learning: '', carryForward: '' };
+  }
+  return state.days[dateStr];
+}
+
+function getDayCompletion(dayData) {
+  if (!dayData) return { completed: 0, total: 0, rate: 0 };
+  let completed = 0, total = 8;
+  Object.values(dayData.morning).forEach(v => { if (v) completed++; });
+  Object.values(dayData.evening).forEach(v => { if (v) completed++; });
+  if (dayData.weeklyPractice && dayData.weeklyPractice.type) {
+    total++;
+    if (dayData.weeklyPractice.completed) completed++;
+  }
+  return { completed, total, rate: total > 0 ? completed / total : 0 };
+}
+
+function getReadingBooks() {
+  if (!state.reading.books) state.reading.books = createDefaultReadingBooks();
+  return state.reading.books;
+}
+
+function getBookDisplay(bookId) {
+  return getReadingBooks().find(book => book.id === bookId) || null;
+}
+
+function getBookIndex(bookId) {
+  return getReadingBooks().findIndex(book => book.id === bookId);
+}
+
+function getFallbackBookIdForMonth(month) {
+  const books = getReadingBooks();
+  if (!books.length) return null;
+  const defaultIndex = Math.max(0, readingList.findIndex(book => book.id === getBookForMonth(month)));
+  return books[Math.min(defaultIndex, books.length - 1)].id;
+}
+
+function getCurrentReadingBookId(month = getCurrentMonth(state.startDate)) {
+  const books = getReadingBooks();
+  if (!books.length) return null;
+  const currentBook = parseInt(state.reading.currentBook, 10);
+  if (books.some(book => book.id === currentBook)) return currentBook;
+  const fallbackId = getFallbackBookIdForMonth(month);
+  state.reading.currentBook = fallbackId;
+  return fallbackId;
+}
+
+function getNextReadingBookId(bookId) {
+  const books = getReadingBooks();
+  const index = getBookIndex(bookId);
+  if (index === -1) return books[0] ? books[0].id : null;
+  return books[index + 1] ? books[index + 1].id : bookId;
+}
+
+function getNewReadingBookId() {
+  return getReadingBooks().reduce((maxId, book) => Math.max(maxId, book.id), 0) + 1;
+}
+
+function getBookMeta(bookId) {
+  if (!state.reading.bookMeta) state.reading.bookMeta = {};
+  return state.reading.bookMeta[bookId] || {};
+}
+
+function setBookMeta(bookId, nextMeta) {
+  if (!state.reading.bookMeta) state.reading.bookMeta = {};
+  state.reading.bookMeta[bookId] = {
+    lookupKey: '',
+    coverUrl: '',
+    description: '',
+    status: '',
+    source: '',
+    error: '',
+    fetchedAt: '',
+    lookupVersion: 0,
+    ...getBookMeta(bookId),
+    ...nextMeta
+  };
+}
+
+function clearBookMeta(bookId) {
+  if (state.reading.bookMeta) delete state.reading.bookMeta[bookId];
+  delete bookLookupRuntime[bookId];
+}
+
+function hasFreshBookMetadata(meta, lookupKey) {
+  if (!meta || meta.lookupKey !== lookupKey || !meta.status) return false;
+  if (!meta.description && (meta.lookupVersion || 0) < BOOK_METADATA_LOOKUP_VERSION) return false;
+  return true;
+}
+
+function normalizeBookText(value) {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function getBookLookupKey(title, author) {
+  const normalizedTitle = normalizeBookText(title);
+  const normalizedAuthor = normalizeBookText(author);
+  return normalizedTitle && normalizedAuthor ? `${normalizedTitle}::${normalizedAuthor}` : '';
+}
+
+function sharedTokenCount(a, b) {
+  const aTokens = new Set(normalizeBookText(a).split(' ').filter(Boolean));
+  const bTokens = normalizeBookText(b).split(' ').filter(Boolean);
+  let matches = 0;
+  bTokens.forEach(token => {
+    if (aTokens.has(token)) matches++;
+  });
+  return matches;
+}
+
+function getOpenLibraryScore(doc, title, author) {
+  const candidateTitle = normalizeBookText(doc.title);
+  const candidateAuthors = (doc.author_name || []).map(normalizeBookText).filter(Boolean);
+  if (!candidateTitle || candidateAuthors.length === 0) return -1;
+
+  const titleKey = normalizeBookText(title);
+  const authorKey = normalizeBookText(author);
+  let score = 0;
+
+  if (candidateTitle === titleKey) score += 8;
+  else if (candidateTitle.includes(titleKey) || titleKey.includes(candidateTitle)) score += 5;
+  score += sharedTokenCount(candidateTitle, titleKey);
+
+  if (candidateAuthors.some(name => name === authorKey)) score += 6;
+  else if (candidateAuthors.some(name => name.includes(authorKey) || authorKey.includes(name))) score += 4;
+  else score += Math.max(...candidateAuthors.map(name => sharedTokenCount(name, authorKey)), 0);
+
+  if (doc.cover_i) score += 1;
+  return score;
+}
+
+function chooseBestOpenLibraryDoc(docs, title, author) {
+  let bestDoc = null;
+  let bestScore = -1;
+  (docs || []).forEach(doc => {
+    const score = getOpenLibraryScore(doc, title, author);
+    if (score > bestScore) {
+      bestScore = score;
+      bestDoc = doc;
+    }
+  });
+  return bestScore >= 6 ? bestDoc : null;
+}
+
+function getGoogleBooksScore(item, title, author) {
+  const info = item && item.volumeInfo ? item.volumeInfo : {};
+  const candidateTitle = normalizeBookText(info.title);
+  const candidateAuthors = (info.authors || []).map(normalizeBookText).filter(Boolean);
+  if (!candidateTitle || candidateAuthors.length === 0) return -1;
+
+  const titleKey = normalizeBookText(title);
+  const authorKey = normalizeBookText(author);
+  let score = 0;
+
+  if (candidateTitle === titleKey) score += 8;
+  else if (candidateTitle.includes(titleKey) || titleKey.includes(candidateTitle)) score += 5;
+  score += sharedTokenCount(candidateTitle, titleKey);
+
+  if (candidateAuthors.some(name => name === authorKey)) score += 6;
+  else if (candidateAuthors.some(name => name.includes(authorKey) || authorKey.includes(name))) score += 4;
+  else score += Math.max(...candidateAuthors.map(name => sharedTokenCount(name, authorKey)), 0);
+
+  if (info.description) score += 2;
+  return score;
+}
+
+function chooseBestGoogleBook(items, title, author) {
+  let bestItem = null;
+  let bestScore = -1;
+  (items || []).forEach(item => {
+    const score = getGoogleBooksScore(item, title, author);
+    if (score > bestScore) {
+      bestScore = score;
+      bestItem = item;
+    }
+  });
+  return bestScore >= 6 ? bestItem : null;
+}
+
+function collapseWhitespace(text) {
+  return (text || '').replace(/\s+/g, ' ').trim();
+}
+
+function stripHtml(text) {
+  if (!text) return '';
+  const probe = document.createElement('div');
+  probe.innerHTML = text;
+  return probe.textContent || probe.innerText || '';
+}
+
+function truncateText(text, maxLength) {
+  const cleaned = collapseWhitespace(text);
+  if (cleaned.length <= maxLength) return cleaned;
+  let shortened = cleaned.slice(0, maxLength + 1);
+  const lastSpace = shortened.lastIndexOf(' ');
+  if (lastSpace > Math.floor(maxLength * 0.65)) shortened = shortened.slice(0, lastSpace);
+  else shortened = shortened.slice(0, maxLength);
+  return shortened.replace(/[.,;:!? ]+$/g, '') + '\u2026';
+}
+
+function extractOpenLibraryText(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value.map(extractOpenLibraryText).filter(Boolean).join(' ');
+  if (typeof value === 'object') {
+    if (typeof value.value === 'string') return value.value;
+    if (typeof value.excerpt === 'string') return value.excerpt;
+    if (typeof value.text === 'string') return value.text;
+    if (typeof value.note === 'string') return value.note;
+  }
+  return '';
+}
+
+function normalizeBookDescription(text) {
+  return truncateText(stripHtml(text), BOOK_DESCRIPTION_LENGTH);
+}
+
+function looksLikeUsefulBookDescription(text) {
+  const cleaned = collapseWhitespace(text);
+  if (!cleaned) return false;
+  if (cleaned.length < 36 && cleaned.split(' ').length < 6) return false;
+  return !/^(includes bibliographical references|includes index|translation of|cover title|previously published|abridged|unabridged)\b/i.test(cleaned);
+}
+
+function pickFirstUsableBookDescription(candidates) {
+  for (const candidate of candidates) {
+    const cleaned = normalizeBookDescription(candidate);
+    if (looksLikeUsefulBookDescription(cleaned)) return cleaned;
+  }
+  return '';
+}
+
+function getOpenLibraryDescriptionCandidates(record) {
+  if (!record || typeof record !== 'object') return [];
+  return [
+    extractOpenLibraryText(record.description),
+    extractOpenLibraryText(record.first_sentence),
+    extractOpenLibraryText(record.excerpts),
+    extractOpenLibraryText(record.notes)
+  ].filter(Boolean);
+}
+
+function getBookMetaStatus(bookId) {
+  const book = getBookDisplay(bookId);
+  if (!book) {
+    return { tone: '', message: 'No book is selected right now.' };
+  }
+  const key = getBookLookupKey(book.title, book.author);
+  const meta = getBookMeta(bookId);
+  const runtime = bookLookupRuntime[bookId];
+
+  if (!key) {
+    return { tone: '', message: 'Enter a title and author to auto-fill the cover and description.' };
+  }
+  if (runtime && runtime.lookupKey === key) {
+    return { tone: '', message: `Looking up details from ${BOOK_LOOKUP_SERVICES}...` };
+  }
+  if (meta.lookupKey !== key || !meta.status) {
+    return { tone: '', message: 'Ready to fetch book details automatically.' };
+  }
+  if (meta.status === 'found') {
+    return { tone: 'success', message: `Auto-filled from ${meta.source || BOOK_LOOKUP_SOURCE}.` };
+  }
+  if (meta.status === 'missing') {
+    return { tone: '', message: 'No matching cover or description was found for this title yet.' };
+  }
+  return { tone: 'error', message: meta.error || `Could not reach ${BOOK_LOOKUP_SERVICES} right now.` };
+}
+
+async function fetchJsonWithTimeout(url, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+    return await response.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchOpenLibraryDescription(workKey, editionKeys = []) {
+  const normalizedKey = workKey.startsWith('/works/') ? workKey : `/works/${String(workKey).replace(/^\/+/, '')}`;
+  const data = await fetchJsonWithTimeout(`https://openlibrary.org${normalizedKey}.json`);
+  let description = pickFirstUsableBookDescription(getOpenLibraryDescriptionCandidates(data));
+  if (description) return description;
+
+  const normalizedEditionKeys = (editionKeys || [])
+    .map(key => String(key || '').replace(/^\/+books\//, '').replace(/^\/+/, ''))
+    .filter(Boolean);
+  for (const editionKey of normalizedEditionKeys.slice(0, 3)) {
+    try {
+      const editionData = await fetchJsonWithTimeout(`https://openlibrary.org/books/${editionKey}.json`);
+      description = pickFirstUsableBookDescription(getOpenLibraryDescriptionCandidates(editionData));
+      if (description) return description;
+    } catch (err) {
+      // Keep trying other editions or the fallback source.
+    }
+  }
+  return '';
+}
+
+async function fetchGoogleBooksDescription(title, author) {
+  const query = `${title} ${author}`;
+  const data = await fetchJsonWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=en&printType=books&maxResults=5`);
+  const match = chooseBestGoogleBook(data.items || [], title, author);
+  if (!match) return '';
+  return pickFirstUsableBookDescription([
+    match.volumeInfo && match.volumeInfo.description,
+    match.searchInfo && match.searchInfo.textSnippet
+  ]);
+}
+
+async function fetchBookMetadata(title, author) {
+  let match = null;
+  let coverUrl = '';
+  let description = '';
+  let source = '';
+  let openLibraryError = null;
+
+  try {
+    const searchUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(`${title} ${author}`)}&fields=key,title,author_name,cover_i,edition_key&limit=10&lang=en`;
+    const searchData = await fetchJsonWithTimeout(searchUrl);
+    match = chooseBestOpenLibraryDoc(searchData.docs || [], title, author);
+    coverUrl = match && match.cover_i ? `https://covers.openlibrary.org/b/id/${match.cover_i}-M.jpg?default=false` : '';
+    source = coverUrl ? BOOK_LOOKUP_SOURCE : '';
+  } catch (err) {
+    openLibraryError = err;
+  }
+
+  if (match) {
+    try {
+      description = await fetchOpenLibraryDescription(match.key, match.edition_key || []);
+    } catch (err) {
+      openLibraryError = err;
+      description = '';
+    }
+    if (description) {
+      source = BOOK_LOOKUP_SOURCE;
+    }
+  }
+
+  if (!description) {
+    try {
+      description = await fetchGoogleBooksDescription(title, author);
+    } catch (err) {
+      description = '';
+    }
+    if (description) {
+      source = coverUrl ? `${BOOK_LOOKUP_SOURCE} + ${BOOK_DESCRIPTION_FALLBACK_SOURCE}` : BOOK_DESCRIPTION_FALLBACK_SOURCE;
+    }
+  }
+
+  if (openLibraryError && !coverUrl && !description) {
+    throw openLibraryError;
+  }
+  if (!match && !description) {
+    return { coverUrl: '', description: '', source: BOOK_LOOKUP_SOURCE };
+  }
+
+  return {
+    coverUrl,
+    description,
+    source: source || BOOK_LOOKUP_SOURCE
+  };
+}
+
+async function performBookMetadataLookup(bookId, expectedKey) {
+  try {
+    const book = getBookDisplay(bookId);
+    if (!book) return;
+    const result = await fetchBookMetadata(book.title, book.author);
+    const currentBook = getBookDisplay(bookId);
+    if (!currentBook) return;
+    if (getBookLookupKey(currentBook.title, currentBook.author) !== expectedKey) return;
+    setBookMeta(bookId, {
+      lookupKey: expectedKey,
+      coverUrl: result.coverUrl || '',
+      description: result.description || '',
+      status: result.coverUrl || result.description ? 'found' : 'missing',
+      source: result.source || BOOK_LOOKUP_SOURCE,
+      error: '',
+      fetchedAt: new Date().toISOString(),
+      lookupVersion: BOOK_METADATA_LOOKUP_VERSION
+    });
+    save();
+  } catch (err) {
+    const currentBook = getBookDisplay(bookId);
+    if (!currentBook) return;
+    if (getBookLookupKey(currentBook.title, currentBook.author) !== expectedKey) return;
+    setBookMeta(bookId, {
+      lookupKey: expectedKey,
+      coverUrl: '',
+      description: '',
+      status: 'error',
+      source: BOOK_LOOKUP_SOURCE,
+      error: `Could not reach ${BOOK_LOOKUP_SERVICES} right now.`,
+      fetchedAt: new Date().toISOString(),
+      lookupVersion: BOOK_METADATA_LOOKUP_VERSION
+    });
+    save();
+  } finally {
+    const runtime = bookLookupRuntime[bookId];
+    if (runtime && runtime.lookupKey === expectedKey) delete bookLookupRuntime[bookId];
+    if (activeView === 'progress') render();
+  }
+}
+
+function startBookMetadataLookup(bookId, options = {}) {
+  const book = getBookDisplay(bookId);
+  if (!book) return Promise.resolve(null);
+  const lookupKey = getBookLookupKey(book.title, book.author);
+  if (!lookupKey) {
+    clearBookMeta(bookId);
+    save();
+    if (options.render !== false && activeView === 'progress') render();
+    return Promise.resolve(null);
+  }
+
+  const meta = getBookMeta(bookId);
+  const runtime = bookLookupRuntime[bookId];
+  const alreadyLoaded = hasFreshBookMetadata(meta, lookupKey);
+  if (!options.force && alreadyLoaded) return Promise.resolve(meta);
+  if (runtime && runtime.lookupKey === lookupKey) return runtime.promise || Promise.resolve(runtime);
+
+  bookLookupRuntime[bookId] = { lookupKey };
+  const promise = performBookMetadataLookup(bookId, lookupKey);
+  bookLookupRuntime[bookId].promise = promise;
+
+  if (options.render !== false && activeView === 'progress') render();
+  return promise;
+}
+
+function primeBookMetadataLookups(bookIds) {
+  let queued = false;
+  bookIds.forEach(bookId => {
+    const book = getBookDisplay(bookId);
+    if (!book) return;
+    const lookupKey = getBookLookupKey(book.title, book.author);
+    if (!lookupKey) return;
+    const meta = getBookMeta(bookId);
+    const runtime = bookLookupRuntime[bookId];
+    if (hasFreshBookMetadata(meta, lookupKey)) return;
+    if (runtime && runtime.lookupKey === lookupKey) return;
+
+    bookLookupRuntime[bookId] = { lookupKey };
+    bookLookupRuntime[bookId].promise = performBookMetadataLookup(bookId, lookupKey);
+    queued = true;
+  });
+
+  if (queued) {
+    requestAnimationFrame(() => {
+      if (activeView === 'progress') render();
+    });
+  }
+}
+
+// ── INIT ──
+function init() {
+  state = loadState();
+  if (!state) {
+    renderSetup();
+    return;
+  }
+  document.getElementById('nav').style.display = 'flex';
+  setupNav();
+  render();
+}
+
+function renderSetup() {
+  document.getElementById('nav').style.display = 'none';
+  const app = document.getElementById('app');
+  const today = todayStr();
+  app.innerHTML = `
+    <div class="setup-shell">
+      <div class="journal-card setup">
+        ${logoSVG('logo-setup')}
+        <div class="view-kicker" style="justify-content:center;">Protocol Iroh</div>
+        <h1>When does your protocol begin?</h1>
+        <div class="setup-copy">Choose the day the record should start. Everything stays local, quiet, and easy to return to.</div>
+        <input type="date" id="start-date" value="${today}">
+        <button class="begin-btn" id="begin-btn">Begin</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('begin-btn').addEventListener('click', () => {
+    const sd = document.getElementById('start-date').value;
+    if (!sd) return;
+    state = {
+      startDate: sd,
+      days: {},
+      monthlyChallenges: {},
+      reading: { currentBook: 1, notes: '', customBooks: {}, bookMeta: {}, books: createDefaultReadingBooks() }
+    };
+    for (let i = 1; i <= 12; i++) {
+      state.monthlyChallenges[i] = { completed: false, note: '' };
+    }
+    save();                // first-time bootstrap — direct save before nav exists
+    document.getElementById('nav').style.display = 'flex';
+    setupNav();
+    render();
+  });
+}
+
+function setupNav() {
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeView = tab.dataset.view;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (activeView === 'daily') viewDate = todayStr();
+      if (activeView === 'week') weekOffset = 0;
+      render();
+    });
+  });
+  // Logo click → return to today
+  const navLogo = document.getElementById('nav-logo');
+  if (navLogo) {
+    navLogo.addEventListener('click', () => {
+      activeView = 'daily';
+      viewDate = todayStr();
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('[data-view="daily"]').classList.add('active');
+      render();
+    });
+  }
+}
+
+let _prevView = null;
+function render() {
+  const app = document.getElementById('app');
+  if (activeView !== _prevView) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    _prevView = activeView;
+  }
+  switch (activeView) {
+    case 'daily': renderDaily(app); break;
+    case 'week': renderWeek(app); break;
+    case 'progress': renderProgress(app); break;
+    case 'reflections': renderReflections(app); break;
+  }
+}
+
+// ── DAILY VIEW ──
+function renderDaily(app) {
+  const today = todayStr();
+  const future = isFuture(viewDate);
+  const curMonth = getCurrentMonth(state.startDate);
+  const day = future ? null : ensureDay(viewDate);
+
+  const morningItems = [
+    {
+      key: 'noPhone',
+      label: 'No phone \u2014 first 20 minutes',
+      description: "Keep the phone completely out of reach for the first 20 minutes after waking. It sets the tone that you lead the day instead of reacting to it."
+    },
+    {
+      key: 'coldExposure',
+      label: 'Cold exposure',
+      description: "Use 30-90 seconds of cold water on the face and forearms, or finish with a brief cold shower. A short hit of discomfort builds steadiness before harder things arrive."
+    },
+    {
+      key: 'breathwork',
+      label: 'Breathwork \u2014 4-7-8 \u00d7 6 cycles',
+      description: "Inhale for 4 seconds, hold for 7, exhale for 8, and repeat for 6 full cycles. Six rounds is enough to reduce noise and create a clean start."
+    },
+    (() => {
+      const stage = meditationProgression[getMeditationStage(curMonth)];
+      return {
+        key: 'meditation',
+        label: `Meditation \u2014 10 min ${stage.technique}`,
+        description: stage.description
+      };
+    })(),
+    {
+      key: 'journaling',
+      label: 'Journaling \u2014 stream of consciousness',
+      description: "Write continuously for 5-10 minutes or one full page without editing, censoring, or rereading. Let the page catch what your mind would otherwise drag through the day."
+    },
+    {
+      key: 'philosophyRead',
+      label: 'Philosophy reading \u2014 one passage',
+      description: "Read one short passage slowly and pause to note a single idea or line that matters. Carry that idea with you and let it shape the rest of the morning."
+    }
+  ];
+  const eveningItems = [
+    {
+      key: 'dailyReview',
+      label: 'Daily review \u2014 three questions',
+      description: "Answer the three reflection prompts in a few honest lines before sleep, even if the answers are brief. Honest review turns repetition into learning."
+    },
+    {
+      key: 'bodyScan',
+      label: 'Body scan \u2014 10 min',
+      description: "Spend 10 minutes moving attention slowly from toes to head and relaxing tension where you notice it. Releasing stored tension makes rest part of the practice, not an accident."
+    }
+  ];
+
+  const dayCompletion = future ? { completed: 0, total: 9 } : getDayCompletion(day);
+  const isTodayView = viewDate === today;
+  let html = `<div class="page-shell daily-page">`;
+
+  // Header
+  html += `<div class="view-hero">
+    <div class="view-kicker">${isTodayView ? 'Today' : 'Daily Record'}</div>
+    <div class="date-nav">
+      <button class="nav-arrow" id="prev-day">\u2190</button>
+      <h1>${formatDateLong(viewDate)}</h1>
+      <button class="nav-arrow" id="next-day">\u2192</button>
+    </div>
+    <div class="view-chip-row">
+      <div class="view-chip">Month ${curMonth} of 12</div>
+      <div class="view-chip">${future ? 'Future date' : `${dayCompletion.completed}/${dayCompletion.total} completed`}</div>
+      ${future ? '' : `<div class="view-chip">${day.emotionalCheckins.length}/3 emotional check-ins</div>`}
+    </div>
+    <div class="view-copy">${monthContext[curMonth]}</div>
+    ${!isTodayView ? '<button class="return-today" id="return-today">\u2190 Return to today</button>' : ''}
+  </div>`;
+
+  if (future) {
+    html += `<div class="journal-card section">
+      ${logoSVG('logo-empty')}
+      <div class="future-msg">Not yet.</div>
+      <div class="future-note">This page opens when the date becomes current.</div>
+    </div></div>`;
+    app.innerHTML = html;
+    bindDayNav();
+    const returnBtn = document.getElementById('return-today');
+    if (returnBtn) returnBtn.addEventListener('click', () => { viewDate = todayStr(); render(); });
+    return;
+  }
+
+  // Morning
+  const mornDone = morningItems.filter(i => day.morning[i.key]).length;
+  html += `<div class="journal-card daily-card section">
+    <div class="section-header">
+      <h2>Morning</h2><span class="tag">35 min</span>
+      <span class="fraction">${mornDone}/6</span>
+    </div>`;
+  morningItems.forEach((item, idx) => {
+    const checked = day.morning[item.key];
+    html += `<div class="check-row" data-group="morning" data-key="${item.key}" role="checkbox" aria-checked="${checked}" tabindex="0">
+      <div class="checkbox${checked ? ' checked' : ''}"></div>
+      <div class="check-copy">
+        <div class="check-label${checked ? ' checked' : ''}">${item.label}</div>
+        <div class="check-description${checked ? ' checked' : ''}">${item.description}</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Weekly practice
+  const dow = dateFromStr(viewDate).getDay();
+  const practice = getTodayPractice(dow);
+  html += `<div class="journal-card daily-card section">
+    <div class="section-header">
+      <h2>Weekly Practice</h2><span class="tag">${practice.duration}</span>
+    </div>
+    <div class="check-row" data-group="weekly" role="checkbox" aria-checked="${day.weeklyPractice.completed}" tabindex="0">
+      <div class="checkbox${day.weeklyPractice.completed ? ' checked' : ''}"></div>
+      <div class="check-copy">
+        <div class="check-label${day.weeklyPractice.completed ? ' checked' : ''}">${practice.label} \u2014 ${practice.sublabel}</div>
+        <div class="check-description${day.weeklyPractice.completed ? ' checked' : ''}">${practice.description}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Emotional check-ins
+  const checkins = day.emotionalCheckins || [];
+  html += `<div class="journal-card daily-card section">
+    <div class="journal-card-header">
+      <div>
+        <h2>Emotional Check-ins</h2>
+        <div class="journal-card-note">Three brief snapshots so the day is not remembered as one undifferentiated mood.</div>
+      </div>
+      <div class="journal-card-aside">${checkins.length}/3</div>
+    </div>`;
+  checkins.forEach((c, idx) => {
+    html += `<div class="checkin-entry">
+      <span class="checkin-time">${c.time}</span>
+      <span>\u2014 ${escHtml(c.label)}</span>
+      <button class="checkin-delete" data-idx="${idx}">\u00d7</button>
+    </div>`;
+  });
+  if (checkins.length < 3) {
+    html += `<div class="checkin-input-row">
+      <input type="text" id="checkin-input" placeholder="What exactly am I feeling right now?" aria-label="Emotional check-in">
+      <button class="log-btn" id="log-checkin">Log</button>
+    </div>
+    <div class="emotion-scaffold">
+      <button class="emotion-toggle" id="emotion-toggle">\u25B8 emotion vocabulary</button>
+      <div class="emotion-grid" id="emotion-grid">
+        ${emotionWords.map((group, gi) => {
+          const quadrants = ['high-difficult','low-difficult','high-pleasant','low-pleasant'];
+          return `<div class="emotion-group" data-quadrant="${quadrants[gi]}"><div class="emotion-group-label">${group.label}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">` +
+          group.words.map(w => `<span class="emotion-word">${w}</span>`).join('') +
+          `</div></div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  } else {
+    html += `<div class="checkin-complete">3/3 logged</div>`;
+  }
+  html += `</div>`;
+
+  // Evening
+  const eveDone = eveningItems.filter(i => day.evening[i.key]).length;
+  html += `<div class="journal-card daily-card section">
+    <div class="section-header">
+      <h2>Evening</h2><span class="tag">15 min</span>
+      <span class="fraction">${eveDone}/2</span>
+    </div>`;
+  eveningItems.forEach(item => {
+    const checked = day.evening[item.key];
+    html += `<div class="check-row" data-group="evening" data-key="${item.key}" role="checkbox" aria-checked="${checked}" tabindex="0">
+      <div class="checkbox${checked ? ' checked' : ''}"></div>
+      <div class="check-copy">
+        <div class="check-label${checked ? ' checked' : ''}">${item.label}</div>
+        <div class="check-description${checked ? ' checked' : ''}">${item.description}</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Evening reflection
+  const ref = day.eveningReflection;
+  const hasSome = ref.reacted || ref.avoided || ref.grateful;
+  html += `<div class="journal-card daily-card section">
+    <div class="expandable-header" id="reflection-toggle">
+      <span class="chevron" id="reflection-chevron">\u25B6</span>
+      <h2>Evening Reflection</h2>
+      ${hasSome ? '<span class="filled-dot"></span>' : ''}
+    </div>
+    <div class="expandable-body" id="reflection-body">
+      <div class="reflection-field">
+        <label for="ref-reacted">Where did I react instead of respond?</label>
+        <textarea id="ref-reacted" aria-label="Where did I react instead of respond?">${escHtml(ref.reacted)}</textarea>
+      </div>
+      <div class="reflection-field">
+        <label for="ref-avoided">What did I avoid?</label>
+        <textarea id="ref-avoided" aria-label="What did I avoid?">${escHtml(ref.avoided)}</textarea>
+      </div>
+      <div class="reflection-field">
+        <label for="ref-grateful">What am I grateful for that I didn't create?</label>
+        <textarea id="ref-grateful" aria-label="What am I grateful for that I didn't create?">${escHtml(ref.grateful)}</textarea>
+      </div>
+    </div>
+  </div>`;
+
+  // Weekly Integration (Sundays only)
+  const isSunday = dateFromStr(viewDate).getDay() === 0;
+  if (isSunday) {
+    const wi = day.weeklyIntegration || { pattern: '', learning: '', carryForward: '' };
+    const hasWI = wi.pattern || wi.learning || wi.carryForward;
+    html += `<div class="journal-card daily-card section weekly-integration">
+      <div class="expandable-header" id="integration-toggle">
+        <span class="chevron" id="integration-chevron">\u25B6</span>
+        <h2>Weekly Integration</h2>
+        ${hasWI ? '<span class="filled-dot"></span>' : ''}
+      </div>
+      <div class="expandable-body" id="integration-body">
+        <div class="reflection-field">
+          <label>What pattern kept showing up this week?</label>
+          <textarea id="wi-pattern">${escHtml(wi.pattern)}</textarea>
+        </div>
+        <div class="reflection-field">
+          <label>What am I learning about myself that I didn\u2019t expect?</label>
+          <textarea id="wi-learning">${escHtml(wi.learning)}</textarea>
+        </div>
+        <div class="reflection-field">
+          <label>What do I want to carry into next week?</label>
+          <textarea id="wi-carryForward">${escHtml(wi.carryForward)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Reading
+  const bookId = getCurrentReadingBookId(curMonth);
+  const book = bookId ? getBookDisplay(bookId) : null;
+  html += `<div class="journal-card section reading-block">
+    <h3>Current Reading</h3>
+    ${book
+      ? `<div>${book.title} \u2014 ${book.author}${book.translation ? ' (' + book.translation + ' translation)' : ''}</div>
+         <div style="color:var(--text-tertiary);margin-top:2px;">${book.instruction || 'Set the next book from Progress when you are ready.'}</div>`
+      : `<div style="color:var(--text-tertiary);">No book added yet.</div>`}
+  </div>`;
+
+  // Monthly challenge
+  const mc = state.monthlyChallenges[curMonth] || { completed: false, note: '' };
+  html += `<div class="journal-card daily-card section challenge-block">
+    <h3>Monthly Challenge \u2014 Month ${curMonth}</h3>
+    <div style="margin:6px 0;line-height:1.5;">${monthlyChallenges[curMonth]}</div>
+    <div class="check-row" data-group="challenge" role="checkbox" aria-checked="${mc.completed}" tabindex="0">
+      <div class="checkbox${mc.completed ? ' checked' : ''}"></div>
+      <span class="check-label${mc.completed ? ' checked' : ''}">Completed</span>
+    </div>
+    <div class="challenge-note">
+      <textarea id="challenge-note" placeholder="Optional note...">${escHtml(mc.note)}</textarea>
+    </div>
+  </div></div>`;
+
+  app.innerHTML = html;
+  bindDaily(day, curMonth);
+}
+
+function bindDayNav() {
+  document.getElementById('prev-day').addEventListener('click', () => { viewDate = addDays(viewDate, -1); render(); });
+  document.getElementById('next-day').addEventListener('click', () => { viewDate = addDays(viewDate, 1); render(); });
+}
+
+function bindDaily(day, curMonth) {
+  bindDayNav();
+
+  // Return to today
+  const returnBtn = document.getElementById('return-today');
+  if (returnBtn) returnBtn.addEventListener('click', () => { viewDate = todayStr(); render(); });
+
+  // Checkboxes — click + keyboard (Space/Enter)
+  function bindCheckRow(selector, handler) {
+    document.querySelectorAll(selector).forEach(row => {
+      row.addEventListener('click', handler);
+      row.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handler.call(row, e); }
+      });
+    });
+  }
+  bindCheckRow('.check-row[data-group="morning"]', function() {
+    const key = this.dataset.key;
+    commit(s => { s.days[viewDate].morning[key] = !s.days[viewDate].morning[key]; });
+  });
+  bindCheckRow('.check-row[data-group="evening"]', function() {
+    const key = this.dataset.key;
+    commit(s => { s.days[viewDate].evening[key] = !s.days[viewDate].evening[key]; });
+  });
+  bindCheckRow('.check-row[data-group="weekly"]', function() {
+    commit(s => { s.days[viewDate].weeklyPractice.completed = !s.days[viewDate].weeklyPractice.completed; });
+  });
+  bindCheckRow('.check-row[data-group="challenge"]', function() {
+    commit(s => { s.monthlyChallenges[curMonth].completed = !s.monthlyChallenges[curMonth].completed; });
+  });
+
+  // Emotional check-ins
+  const logBtn = document.getElementById('log-checkin');
+  const checkinInput = document.getElementById('checkin-input');
+  function logCheckin() {
+    if (!checkinInput) return;
+    const val = checkinInput.value.trim();
+    if (!val) return;
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    commit(s => { s.days[viewDate].emotionalCheckins.push({ time, label: val }); });
+  }
+  if (logBtn) logBtn.addEventListener('click', logCheckin);
+  if (checkinInput) checkinInput.addEventListener('keydown', e => { if (e.key === 'Enter') logCheckin(); });
+
+  document.querySelectorAll('.checkin-delete').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx, 10);
+      commit(s => { s.days[viewDate].emotionalCheckins.splice(idx, 1); });
+    });
+  });
+
+  // Reflection toggle
+  const toggle = document.getElementById('reflection-toggle');
+  const body = document.getElementById('reflection-body');
+  const chevron = document.getElementById('reflection-chevron');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      body.classList.toggle('open');
+      chevron.classList.toggle('open');
+    });
+  }
+
+  // Reflection auto-save (blur: immediate; input: debounced 300ms)
+  ['reacted', 'avoided', 'grateful'].forEach(field => {
+    const el = document.getElementById('ref-' + field);
+    if (el) {
+      const persist = () => commit(s => { s.days[viewDate].eveningReflection[field] = el.value; }, { render: false });
+      el.addEventListener('blur', persist);
+      el.addEventListener('input', debounce(persist, 300));
+    }
+  });
+
+  // Emotion scaffold toggle + word click
+  const emotionToggle = document.getElementById('emotion-toggle');
+  const emotionGrid = document.getElementById('emotion-grid');
+  if (emotionToggle && emotionGrid) {
+    emotionToggle.addEventListener('click', () => {
+      emotionGrid.classList.toggle('open');
+      emotionToggle.textContent = emotionGrid.classList.contains('open') ? '\u25BE emotion vocabulary' : '\u25B8 emotion vocabulary';
+    });
+    emotionGrid.querySelectorAll('.emotion-word').forEach(word => {
+      word.addEventListener('click', () => {
+        const input = document.getElementById('checkin-input');
+        if (input) {
+          const current = input.value.trim();
+          input.value = current ? current + ', ' + word.textContent : word.textContent;
+          input.focus();
+        }
+      });
+    });
+  }
+
+  // Weekly Integration toggle + auto-save (Sundays)
+  const wiToggle = document.getElementById('integration-toggle');
+  const wiBody = document.getElementById('integration-body');
+  const wiChevron = document.getElementById('integration-chevron');
+  if (wiToggle) {
+    wiToggle.addEventListener('click', () => {
+      wiBody.classList.toggle('open');
+      wiChevron.classList.toggle('open');
+    });
+  }
+  ['pattern', 'learning', 'carryForward'].forEach(field => {
+    const el = document.getElementById('wi-' + field);
+    if (el) {
+      const persist = () => commit(s => {
+        if (!s.days[viewDate].weeklyIntegration) s.days[viewDate].weeklyIntegration = { pattern: '', learning: '', carryForward: '' };
+        s.days[viewDate].weeklyIntegration[field] = el.value;
+      }, { render: false });
+      el.addEventListener('blur', persist);
+      el.addEventListener('input', debounce(persist, 300));
+    }
+  });
+
+  // Challenge note auto-save (blur: immediate; input: debounced 300ms)
+  const cn = document.getElementById('challenge-note');
+  if (cn) {
+    const persistNote = () => commit(s => { s.monthlyChallenges[curMonth].note = cn.value; }, { render: false });
+    cn.addEventListener('blur', persistNote);
+    cn.addEventListener('input', debounce(persistNote, 300));
+  }
+}
+
+// ── WEEK VIEW ──
+function renderWeek(app) {
+  const today = todayStr();
+  const todayDate = dateFromStr(today);
+  // Get Monday of current week + offset
+  const d = new Date(todayDate);
+  const dayOfWeek = d.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  d.setDate(d.getDate() + mondayOffset + weekOffset * 7);
+  const monday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+
+  const days = [];
+  for (let i = 0; i < 7; i++) days.push(addDays(monday, i));
+
+  const sunStr = days[6];
+  let totalCompleted = 0, totalPossible = 0;
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const weekEntries = days.map((ds, idx) => {
+    const isToday = ds === today;
+    const future = isFuture(ds);
+    const beforeProtocol = ds < state.startDate;
+    const dayData = state.days[ds];
+    const comp = getDayCompletion(dayData);
+    // For past protocol days with no data yet, count 9 possible (6 morning + 2 evening + 1 weekly)
+    const isPastProtocolNoData = !future && !beforeProtocol && comp.total === 0;
+    totalCompleted += comp.completed;
+    totalPossible += isPastProtocolNoData ? 9 : comp.total;
+
+    const dow = dateFromStr(ds).getDay();
+    const practice = getTodayPractice(dow);
+    const checkins = dayData ? (dayData.emotionalCheckins || []).length : 0;
+
+    const mornCount = dayData ? Object.values(dayData.morning).filter(Boolean).length : 0;
+    const eveCount = dayData ? Object.values(dayData.evening).filter(Boolean).length : 0;
+    const wpDone = dayData && dayData.weeklyPractice && dayData.weeklyPractice.completed;
+    return { ds, idx, isToday, future, beforeProtocol, practice, checkins, mornCount, eveCount, wpDone };
+  });
+  const pct = totalPossible > 0 ? Math.round(totalCompleted / totalPossible * 100) : 0;
+  const activeDays = weekEntries.filter(entry => !entry.future && !entry.beforeProtocol).length;
+  const fullyCompleteDays = weekEntries.filter(entry => {
+    if (entry.future || entry.beforeProtocol) return false;
+    const comp = getDayCompletion(state.days[entry.ds]);
+    return comp.total > 0 && comp.completed === comp.total;
+  }).length;
+
+  let html = `<div class="page-shell week-page">
+    <div class="view-hero">
+      <div class="view-kicker">Week View</div>
+      <div class="view-title-row">
+        <div class="view-title">${formatDateShort(monday)} \u2014 ${formatDateShort(sunStr)}</div>
+        <div class="view-glance">${pct}% completion</div>
+      </div>
+      <div class="view-copy">A seven-day view of routines, weekly practice, and emotional check-ins. Click any day to open its page.</div>
+      <div class="view-chip-row">
+        <div class="view-chip">${activeDays} active day${activeDays === 1 ? '' : 's'}</div>
+        <div class="view-chip">${fullyCompleteDays} fully completed</div>
+      </div>
+      <div class="week-nav">
+        <button class="nav-arrow" id="week-prev">\u2190</button>
+        <span class="week-nav-label">${weekOffset === 0 ? 'This week' : 'Shifted week'}</span>
+        <button class="week-btn" id="week-today">This week</button>
+        <button class="nav-arrow" id="week-next">\u2192</button>
+      </div>
+    </div>
+    <div class="journal-card section">
+      <div class="journal-card-header">
+        <div>
+          <h2>Weekly Snapshot</h2>
+          <div class="journal-card-note">Morning and evening counts show completed items for each day. EC means emotional check-ins.</div>
+        </div>
+        <div class="journal-card-aside">${formatDateShort(monday)} \u2014 ${formatDateShort(sunStr)}</div>
+      </div>
+      <div class="week-grid">`;
+  weekEntries.forEach(entry => {
+    const { ds, idx, isToday, future, beforeProtocol, practice, checkins, mornCount, eveCount, wpDone } = entry;
+    html += `<div class="week-col${isToday ? ' today' : ''}" data-date="${ds}">
+      <div class="week-day">${dayNames[idx]}</div>
+      <div class="week-date">${dateFromStr(ds).getDate()}</div>
+      ${(future || beforeProtocol) ? '<div class="week-stat" style="color:var(--text-tertiary)">\u2014</div>' : `
+      <div class="week-stat">AM <span class="${mornCount===6?'done':''}">${mornCount}/6</span></div>
+      <div class="week-stat">PM <span class="${eveCount===2?'done':''}">${eveCount}/2</span></div>
+      <div class="week-stat">${practice.label.split(' ')[0]} ${wpDone ? '<span class="done">\u2713</span>' : '\u2013'}</div>
+      <div class="week-stat">EC ${checkins}/3</div>`}
+    </div>`;
+  });
+  html += `</div>
+    <div class="week-completion">
+    <div class="week-completion-label">Weekly completion rate: ${pct}%</div>
+    <div class="week-bar"><div class="week-bar-fill" style="width:${pct}%"></div></div>
+  </div></div></div>`;
+
+  app.innerHTML = html;
+
+  document.getElementById('week-prev').addEventListener('click', () => { weekOffset--; render(); });
+  document.getElementById('week-next').addEventListener('click', () => { weekOffset++; render(); });
+  document.getElementById('week-today').addEventListener('click', () => { weekOffset = 0; render(); });
+  document.querySelectorAll('.week-col').forEach(col => {
+    col.addEventListener('click', () => {
+      viewDate = col.dataset.date;
+      activeView = 'daily';
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('[data-view="daily"]').classList.add('active');
+      render();
+    });
+  });
+}
+
+// ── PROGRESS VIEW ──
+function renderProgress(app) {
+  const curMonth = getCurrentMonth(state.startDate);
+  const today = todayStr();
+  const startDate = dateFromStr(state.startDate);
+  const todayDate = dateFromStr(today);
+  const trackedDates = Object.keys(state.days)
+    .filter(ds => ds >= state.startDate && ds <= today)
+    .sort();
+  const readingBooks = getReadingBooks();
+  const curBookId = getCurrentReadingBookId(curMonth);
+  const currentBookIndex = getBookIndex(curBookId);
+  const completedBooks = currentBookIndex === -1 ? 0 : currentBookIndex;
+  const activeMonthChallenge = state.monthlyChallenges[curMonth];
+  let totalCompletedAcrossProtocol = 0;
+  let totalPossibleAcrossProtocol = 0;
+  trackedDates.forEach(ds => {
+    const comp = getDayCompletion(state.days[ds]);
+    totalCompletedAcrossProtocol += comp.completed;
+    totalPossibleAcrossProtocol += comp.total;
+  });
+  const overallRate = totalPossibleAcrossProtocol > 0
+    ? Math.round(totalCompletedAcrossProtocol / totalPossibleAcrossProtocol * 100)
+    : 0;
+  const trackedDaysLabel = `${trackedDates.length} tracked day${trackedDates.length === 1 ? '' : 's'}`;
+  let html = `<div class="progress-page">`;
+  html += `<div class="progress-hero">
+    <div class="progress-kicker">Protocol Record</div>
+    <div class="progress-title-row">
+      <div class="progress-title">Month ${curMonth} of 12</div>
+      <div class="progress-glance">${formatDateShort(state.startDate)} to ${formatDateShort(today)}</div>
+    </div>
+    <div class="progress-copy">A quiet record of what has become repeatable. The point here is steadiness, not spectacle.</div>
+    <div class="progress-chip-row">
+      <div class="progress-chip">Overall completion ${overallRate}%</div>
+      <div class="progress-chip">${trackedDaysLabel}</div>
+      ${readingBooks.length ? `<div class="progress-chip">${completedBooks}/${readingBooks.length} books marked read</div>` : ''}
+    </div>
+  </div>`;
+
+  // Heatmap
+  html += `<div class="progress-card section">
+    <div class="progress-card-header">
+      <div class="progress-card-title">
+        <h2>Activity</h2>
+        <div class="progress-card-note">A trace of completed days since the protocol began.</div>
+      </div>
+      <div class="heatmap-legend" aria-hidden="true">
+        <span>Low</span>
+        <span class="heatmap-swatch"></span>
+        <span class="heatmap-swatch level-1"></span>
+        <span class="heatmap-swatch level-2"></span>
+        <span class="heatmap-swatch level-3"></span>
+        <span class="heatmap-swatch level-4"></span>
+        <span>High</span>
+      </div>
+    </div>
+    <div class="heatmap-wrap"><div class="heatmap" id="heatmap">`;
+  // Build weeks
+  let cur = new Date(startDate);
+  // Align to Monday
+  const startDow = cur.getDay();
+  const alignOffset = startDow === 0 ? -6 : 1 - startDow;
+  cur.setDate(cur.getDate() + alignOffset);
+
+  while (cur <= todayDate || cur.getDay() !== 1) {
+    html += `<div class="heatmap-col">`;
+    for (let r = 0; r < 7; r++) {
+      const ds = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
+      const inRange = ds >= state.startDate && ds <= today;
+      if (inRange) {
+        const dayData = state.days[ds];
+        const comp = getDayCompletion(dayData);
+        let level = '';
+        if (comp.rate === 0) level = '';
+        else if (comp.rate <= 0.4) level = 'level-1';
+        else if (comp.rate <= 0.7) level = 'level-2';
+        else if (comp.rate < 1) level = 'level-3';
+        else level = 'level-4';
+        const tip = `${formatDateShort(ds)} \u2014 ${comp.completed}/${comp.total} completed`;
+        html += `<div class="heatmap-cell ${level}"><div class="heatmap-tooltip">${tip}</div></div>`;
+      } else {
+        html += `<div class="heatmap-cell"></div>`;
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+    html += `</div>`;
+    if (cur > todayDate) break;
+  }
+  html += `</div></div></div>`;
+
+  // Streaks
+  let currentStreak = 0, longestStreak = 0, tempStreak = 0;
+  let checkDate = new Date(todayDate);
+  // Calculate from today backwards
+  while (true) {
+    const ds = checkDate.getFullYear() + '-' + String(checkDate.getMonth()+1).padStart(2,'0') + '-' + String(checkDate.getDate()).padStart(2,'0');
+    if (ds < state.startDate) break;
+    const dayData = state.days[ds];
+    if (dayData && dayData.morning && dayData.morning.meditation) {
+      currentStreak++;
+    } else {
+      break;
+    }
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+  // Calculate longest streak across all days
+  let d2 = dateFromStr(state.startDate);
+  tempStreak = 0;
+  while (d2 <= todayDate) {
+    const ds = d2.getFullYear() + '-' + String(d2.getMonth()+1).padStart(2,'0') + '-' + String(d2.getDate()).padStart(2,'0');
+    const dayData = state.days[ds];
+    if (dayData && dayData.morning && dayData.morning.meditation) {
+      tempStreak++;
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+    d2.setDate(d2.getDate() + 1);
+  }
+
+  // Per-habit completion breakdown
+  const habitKeys = [
+    { key: 'noPhone', group: 'morning', label: 'No phone' },
+    { key: 'coldExposure', group: 'morning', label: 'Cold exposure' },
+    { key: 'breathwork', group: 'morning', label: 'Breathwork' },
+    { key: 'meditation', group: 'morning', label: 'Meditation' },
+    { key: 'journaling', group: 'morning', label: 'Journaling' },
+    { key: 'philosophyRead', group: 'morning', label: 'Philosophy reading' },
+    { key: 'dailyReview', group: 'evening', label: 'Daily review' },
+    { key: 'bodyScan', group: 'evening', label: 'Body scan' },
+    { key: 'weeklyPractice', group: 'weekly', label: 'Weekly practice' }
+  ];
+  let totalTrackedDays = 0;
+  const habitCounts = {};
+  habitKeys.forEach(h => habitCounts[h.key] = 0);
+  Object.keys(state.days).forEach(ds => {
+    if (ds > today || ds < state.startDate) return;
+    totalTrackedDays++;
+    const dd = state.days[ds];
+    habitKeys.forEach(h => {
+      if (h.group === 'morning' && dd.morning && dd.morning[h.key]) habitCounts[h.key]++;
+      else if (h.group === 'evening' && dd.evening && dd.evening[h.key]) habitCounts[h.key]++;
+      else if (h.group === 'weekly' && dd.weeklyPractice && dd.weeklyPractice.completed) habitCounts[h.key]++;
+    });
+  });
+  html += `<div class="progress-card section">
+    <div class="progress-card-header">
+      <div class="progress-card-title">
+        <h2>Consistency</h2>
+        <div class="progress-card-note">Meditation streaks follow the existing protocol rule and show whether the practice is becoming ordinary.</div>
+      </div>
+      <div class="progress-card-aside">${overallRate}% overall</div>
+    </div>
+    <div class="progress-metrics">
+      <div class="progress-metric">
+        <div class="progress-metric-value">${currentStreak}</div>
+        <div class="progress-metric-label">Current Meditation Streak</div>
+      </div>
+      <div class="progress-metric">
+        <div class="progress-metric-value">${longestStreak}</div>
+        <div class="progress-metric-label">Longest Meditation Streak</div>
+      </div>
+    </div>`;
+  if (totalTrackedDays > 0) {
+    html += `<div class="progress-subsection-title">Habit Breakdown</div><div class="habit-bars">`;
+    habitKeys.forEach(h => {
+      const pct = Math.round(habitCounts[h.key] / totalTrackedDays * 100);
+      const isLow = pct > 0 && pct < 30;
+      html += `<div class="habit-bar-row">
+        <div class="habit-bar-label">${h.label}</div>
+        <div class="habit-bar-track"><div class="habit-bar-fill${isLow ? ' low' : ''}" style="width:${pct}%"></div></div>
+        <div class="habit-bar-pct${isLow ? ' low' : ''}">${pct}%</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  // Monthly challenges
+  html += `<div class="progress-card section">
+    <div class="progress-card-header">
+      <div class="progress-card-title">
+        <h2>Monthly Challenges</h2>
+        <div class="progress-card-note">Open any month to revisit the prompt and your note.</div>
+      </div>
+      <div class="progress-card-aside">${activeMonthChallenge && activeMonthChallenge.completed ? 'Marked complete' : `Month ${curMonth} active`}</div>
+    </div>
+    <div class="monthly-circles">`;
+  for (let i = 1; i <= 12; i++) {
+    const mc = state.monthlyChallenges[i];
+    const cls = mc && mc.completed ? 'completed' : (i === curMonth ? 'current' : '');
+    html += `<div class="month-circle ${cls}" data-month="${i}">${i}</div>`;
+  }
+  html += `</div><div id="challenge-detail"></div></div>`;
+
+  // Training focus
+  const currentTrainingFocus = trainingFocus[curMonth] || trainingFocus[12];
+  html += `<div class="progress-card training-focus-block section">
+    <div class="progress-card-header">
+      <div class="progress-card-title">
+        <h2>Training Focus</h2>
+        <div class="progress-card-note">A practical anchor for this phase of the protocol.</div>
+      </div>
+      <div class="training-focus-phase">Month ${curMonth}: ${escHtml(currentTrainingFocus.phase)}</div>
+    </div>
+    <div class="training-focus-row">
+      <div class="training-focus-label">Focus</div>
+      <div class="training-focus-text">${escHtml(currentTrainingFocus.focus)}</div>
+    </div>
+    <div class="training-focus-row">
+      <div class="training-focus-label">Session</div>
+      <div class="training-focus-text">${escHtml(currentTrainingFocus.session)}</div>
+    </div>
+    <div class="training-focus-row">
+      <div class="training-focus-label">Progression</div>
+      <div class="training-focus-text">${escHtml(currentTrainingFocus.progression)}</div>
+    </div>
+    <div class="training-focus-row">
+      <div class="training-focus-label">Recovery</div>
+      <div class="training-focus-text">${escHtml(currentTrainingFocus.recovery)}</div>
+    </div>
+  </div>`;
+
+  // Reading progress
+  html += `<div class="progress-card reading-progress-block section">
+    <div class="progress-card-header">
+      <div class="progress-card-title">
+        <div class="reading-progress-header">
+          <h2>Reading Progress</h2>
+          <button class="book-action-btn" id="add-book">Add Book</button>
+        </div>
+        <div class="progress-card-note">Covers are fetched once. Descriptions are cached when available.</div>
+      </div>
+      <div class="progress-card-aside">${readingBooks.length ? `${completedBooks}/${readingBooks.length} read` : 'No books yet'}</div>
+    </div>
+    <div>`;
+  if (!readingBooks.length) {
+    html += `<div class="no-data-note">No books yet. Add one to start tracking.</div>`;
+  }
+  readingBooks.forEach((book, index) => {
+    const isPast = currentBookIndex !== -1 && index < currentBookIndex;
+    const isCur = book.id === curBookId;
+    const cls = isCur ? 'current' : (isPast ? 'past' : '');
+    const checkCls = isPast ? 'done' : (isCur ? 'current-book' : '');
+    const stageLabel = isCur ? 'Current' : (isPast ? 'Completed' : 'Up Next');
+    const stageClass = isPast ? ' completed' : (isCur ? '' : ' up-next');
+    const display = getBookDisplay(book.id);
+    const lookupKey = getBookLookupKey(display.title, display.author);
+    const meta = getBookMeta(book.id);
+    const metaMatchesBook = meta.lookupKey === lookupKey;
+    const status = getBookMetaStatus(book.id);
+    const isLookupRunning = !!(bookLookupRuntime[book.id] && bookLookupRuntime[book.id].lookupKey === lookupKey);
+    const description = metaMatchesBook ? meta.description : '';
+    const coverUrl = metaMatchesBook ? meta.coverUrl : '';
+    const descriptionText = description
+      || (isLookupRunning
+        ? 'Searching for a brief description...'
+        : lookupKey
+          ? 'A short description will appear here automatically once the lookup completes.'
+          : 'Add a title and author and the app will fill this in automatically.');
+    const coverPlaceholder = isLookupRunning ? 'Searching...' : (lookupKey ? 'No cover yet' : 'Add book info');
+    const refreshLabel = isLookupRunning ? 'Searching...' : ((metaMatchesBook && meta.status === 'found') ? 'Refresh' : 'Retry');
+    html += `<div class="book-row ${cls}" style="align-items:flex-start;">
+      <div class="book-check ${checkCls}" data-book-check="${book.id}" style="cursor:pointer;flex-shrink:0;margin-top:3px;"></div>
+      <div class="book-main">
+        <div class="book-stage${stageClass}">${stageLabel}</div>
+        <div class="book-input-row">
+          <input class="book-edit" data-book-id="${book.id}" data-field="title" value="${escHtml(display.title)}" placeholder="Title">
+          <span class="book-sep">&mdash;</span>
+          <input class="book-edit" data-book-id="${book.id}" data-field="author" value="${escHtml(display.author)}" placeholder="Author">
+          <button class="book-action-btn" data-remove-book="${book.id}">Remove</button>
+        </div>
+        <div class="book-date-row">
+          <input class="book-edit book-date" data-book-id="${book.id}" data-field="startDate" value="${escHtml(display.startDate)}" placeholder="started">
+          <span class="book-arr">&rarr;</span>
+          <input class="book-edit book-date" data-book-id="${book.id}" data-field="endDate" value="${escHtml(display.endDate)}" placeholder="finished">
+        </div>
+        <div class="book-meta">
+          <div class="book-cover-shell${isLookupRunning ? ' cover-loading' : ''}">
+            ${coverUrl
+              ? `<img class="book-cover-img" data-cover-id="${book.id}" src="${escHtml(coverUrl)}" alt="Cover of ${escHtml(display.title || 'book')}" loading="lazy" referrerpolicy="no-referrer">
+                 <div class="book-cover-placeholder" data-cover-fallback="${book.id}" style="display:none;">No cover</div>`
+              : `<div class="book-cover-placeholder">${coverPlaceholder}</div>`}
+          </div>
+          <div class="book-meta-copy">
+            <div class="book-description${description ? '' : ' empty'}">${escHtml(descriptionText)}</div>
+            <div class="book-meta-row">
+              <div class="book-meta-status${status.tone ? ' ' + status.tone : ''}">${escHtml(status.message)}</div>
+              ${lookupKey ? `<button class="book-meta-refresh" data-book-refresh="${book.id}"${isLookupRunning ? ' disabled' : ''}>${refreshLabel}</button>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // Behavioral marker
+  html += `<div class="progress-card behavioral-block section">
+    <div class="progress-card-header">
+      <div class="progress-card-title">
+        <h2>Internal Reality</h2>
+        <div class="progress-card-note">The emotional weather of this month in the protocol.</div>
+      </div>
+      <div class="progress-card-aside">Month ${curMonth}</div>
+    </div>
+    <div class="behavioral-copy">${monthContext[curMonth]}</div>
+  </div>`;
+
+  // Export / Import
+  html += `${logoSVG('logo-footer')}
+  <div class="export-row">
+    <button class="export-link" id="export-btn">Export</button>
+    <button class="export-link" id="import-btn">Import</button>
+    <input type="file" id="import-file" accept=".json">
+  </div></div>`;
+
+  app.innerHTML = html;
+
+  // Book cover error handling — JS binding instead of inline onerror
+  document.querySelectorAll('.book-cover-img[data-cover-id]').forEach(img => {
+    const id = img.dataset.coverId;
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      const fallback = document.querySelector(`.book-cover-placeholder[data-cover-fallback="${id}"]`);
+      if (fallback) fallback.style.display = 'flex';
+    });
+  });
+
+  // Book checkboxes — click to mark read / unread
+  document.querySelectorAll('.book-check[data-book-check]').forEach(check => {
+    check.addEventListener('click', () => {
+      const id = parseInt(check.dataset.bookCheck, 10);
+      const cur = getCurrentReadingBookId(curMonth);
+      commit(s => {
+        if (getBookIndex(id) !== -1 && getBookIndex(cur) !== -1 && getBookIndex(id) < getBookIndex(cur)) {
+          s.reading.currentBook = id;
+        } else {
+          s.reading.currentBook = getNextReadingBookId(id);
+        }
+      });
+    });
+  });
+
+  // Book edits — save on blur
+  const addBookButton = document.getElementById('add-book');
+  if (addBookButton) {
+    addBookButton.addEventListener('click', () => {
+      const newBookId = getNewReadingBookId();
+      pendingBookFocusId = newBookId;
+      commit(s => {
+        s.reading.books.push(normalizeReadingBook({
+          id: newBookId, title: '', author: '', translation: null,
+          months: '', instruction: '', startDate: '', endDate: ''
+        }, newBookId));
+        if (!s.reading.currentBook) s.reading.currentBook = newBookId;
+      });
+    });
+  }
+
+  document.querySelectorAll('[data-remove-book]').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt(button.dataset.removeBook, 10);
+      const bookToRemove = getBookDisplay(id);
+      const bookName = bookToRemove && bookToRemove.title ? bookToRemove.title : 'this book';
+      if (!confirm(`Remove "${bookName}" and its cover data? This cannot be undone.`)) return;
+      if (pendingBookFocusId === id) pendingBookFocusId = null;
+      commit(s => {
+        const books = s.reading.books;
+        const index = books.findIndex(book => book.id === id);
+        if (index === -1) return;
+        books.splice(index, 1);
+        clearBookMeta(id);
+        if (s.reading.currentBook === id) {
+          if (books[index]) s.reading.currentBook = books[index].id;
+          else if (books[index - 1]) s.reading.currentBook = books[index - 1].id;
+          else s.reading.currentBook = null;
+        }
+      });
+    });
+  });
+
+  // Book edits — save on blur
+  document.querySelectorAll('.book-edit').forEach(input => {
+    input.addEventListener('blur', () => {
+      const id = parseInt(input.dataset.bookId, 10);
+      const field = input.dataset.field;
+      const previousBook = getBookDisplay(id);
+      if (!previousBook) return;
+      const previousTitle = previousBook.title;
+      const previousAuthor = previousBook.author;
+      commit(s => {
+        const book = s.reading.books.find(b => b.id === id);
+        if (book) book[field] = input.value;
+      }, { render: false });
+      const nextBook = getBookDisplay(id);
+      const bookIdentityChanged = previousTitle !== nextBook.title || previousAuthor !== nextBook.author;
+      if ((field === 'title' || field === 'author') && bookIdentityChanged) {
+        clearBookMeta(id);
+        save();
+        if (getBookLookupKey(nextBook.title, nextBook.author)) {
+          startBookMetadataLookup(id, { force: true });
+        } else if (activeView === 'progress') {
+          render();
+        }
+      }
+    });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+  });
+
+  document.querySelectorAll('.book-meta-refresh[data-book-refresh]').forEach(button => {
+    button.addEventListener('click', () => {
+      startBookMetadataLookup(parseInt(button.dataset.bookRefresh, 10), { force: true });
+    });
+  });
+
+  // Challenge detail click
+  document.querySelectorAll('.month-circle').forEach(circle => {
+    circle.addEventListener('click', () => {
+      const m = parseInt(circle.dataset.month);
+      const detail = document.getElementById('challenge-detail');
+      const mc = state.monthlyChallenges[m];
+      if (detail.dataset.active === String(m)) {
+        detail.innerHTML = '';
+        detail.dataset.active = '';
+        return;
+      }
+      detail.dataset.active = String(m);
+      detail.innerHTML = `<div class="challenge-expand">
+        <div class="challenge-expand-title">Month ${m}</div>
+        <div>${monthlyChallenges[m]}</div>
+        ${mc && mc.note ? '<div style="margin-top:6px;color:var(--text-tertiary);">' + escHtml(mc.note) + '</div>' : ''}
+        ${mc && mc.completed ? '<div style="margin-top:4px;color:var(--accent);">Completed</div>' : ''}
+      </div>`;
+    });
+  });
+
+  // Export
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `iroh_protocol_backup_${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('import-btn').addEventListener('click', () => {
+    document.getElementById('import-file').click();
+  });
+  document.getElementById('import-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!confirm('This will replace all current data. Continue?')) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        state = normalizeStateShape(JSON.parse(ev.target.result));
+        save();                // full state replacement — direct save
+        render();
+      } catch(err) {
+        alert('Invalid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  if (pendingBookFocusId) {
+    const focusId = pendingBookFocusId;
+    pendingBookFocusId = null;
+    requestAnimationFrame(() => {
+      const input = document.querySelector(`.book-edit[data-book-id="${focusId}"][data-field="title"]`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+  }
+
+  primeBookMetadataLookups(getReadingBooks().map(book => book.id));
+
+  // Heatmap — tap-to-show tooltip on touch devices
+  document.querySelectorAll('.heatmap-cell').forEach(cell => {
+    cell.addEventListener('click', (e) => {
+      const wasActive = cell.classList.contains('tapped');
+      document.querySelectorAll('.heatmap-cell.tapped').forEach(c => c.classList.remove('tapped'));
+      if (!wasActive) cell.classList.add('tapped');
+      e.stopPropagation();
+    });
+  });
+  if (!renderProgress._clickBound) {
+    renderProgress._clickBound = true;
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.heatmap-cell.tapped').forEach(c => c.classList.remove('tapped'));
+    });
+  }
+}
+
+// ── REFLECTIONS VIEW ──
+function renderReflections(app) {
+  const today = todayStr();
+  const themes = getReflectionThemes(state.days, state.startDate, today);
+  const reflectionEntryCount = Object.keys(state.days).filter(ds => {
+    const day = state.days[ds];
+    if (!day) return false;
+    const ref = day.eveningReflection || {};
+    const checkins = day.emotionalCheckins || [];
+    const wi = day.weeklyIntegration || {};
+    return ref.reacted || ref.avoided || ref.grateful || checkins.length > 0 || wi.pattern || wi.learning || wi.carryForward;
+  }).length;
+
+  let html = `<div class="page-shell reflections-page">
+    <div class="view-hero">
+      <div class="view-kicker">Archive</div>
+      <div class="view-title-row">
+        <div class="view-title">Reflections</div>
+        <div class="view-glance">${reflectionEntryCount} dated entr${reflectionEntryCount === 1 ? 'y' : 'ies'}</div>
+      </div>
+      <div class="view-copy">Search evening reflections, emotional check-ins, and weekly integration notes without turning the page into a dashboard.</div>
+    </div>
+    <div class="journal-card section">
+      <div class="journal-card-header">
+        <div>
+          <h2>Search</h2>
+          <div class="journal-card-note">Use a phrase or tap a recurring word from the last 30 days.</div>
+        </div>
+        <div class="journal-card-aside">${themes.length ? `${themes.length} recurring theme${themes.length === 1 ? '' : 's'}` : 'No recurring themes yet'}</div>
+      </div>
+      <div class="search-input">
+        <input type="text" id="reflection-search" placeholder="Search reflections..." aria-label="Search reflections">
+      </div>`;
+  if (themes.length > 0) {
+    html += `<div style="margin-top:14px;">
+      <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;">Recurring words \u2014 last 30 days</div>
+      <div class="theme-tags" id="theme-tags">
+        ${themes.map(t => `<span class="theme-tag" data-theme="${escHtml(t.word)}">${t.word} <span style="color:var(--text-tertiary)">${t.count}</span></span>`).join('')}
+      </div>
+    </div>`;
+  }
+  html += `</div><div id="reflection-list" class="reflection-list"></div></div>`;
+  app.innerHTML = html;
+
+  function renderList(filter) {
+    const list = document.getElementById('reflection-list');
+    const dates = Object.keys(state.days).sort().reverse();
+    let out = '';
+    const q = (filter || '').toLowerCase();
+
+    dates.forEach(ds => {
+      const day = state.days[ds];
+      const ref = day.eveningReflection || {};
+      const checkins = day.emotionalCheckins || [];
+      const wi = day.weeklyIntegration || {};
+      const hasRef = ref.reacted || ref.avoided || ref.grateful;
+      const hasCheckins = checkins.length > 0;
+      const hasWI = wi.pattern || wi.learning || wi.carryForward;
+      if (!hasRef && !hasCheckins && !hasWI) return;
+
+      // Check filter
+      if (q) {
+        const allText = [ref.reacted, ref.avoided, ref.grateful, wi.pattern, wi.learning, wi.carryForward, ...checkins.map(c => c.label)].join(' ').toLowerCase();
+        if (!allText.includes(q)) return;
+      }
+
+      out += `<div class="journal-card reflection-entry">
+        <div class="reflection-entry-header">
+          <div class="reflection-date">${formatDateLong(ds)}</div>
+          <div class="reflection-meta">${checkins.length ? `${checkins.length} check-in${checkins.length === 1 ? '' : 's'}` : (hasWI ? 'Weekly integration' : 'Reflection')}</div>
+        </div>`;
+      if (ref.reacted) {
+        out += `<div class="reflection-q">Where did I react instead of respond?</div>
+        <div class="reflection-a">${escHtml(ref.reacted)}</div>`;
+      }
+      if (ref.avoided) {
+        out += `<div class="reflection-q">What did I avoid?</div>
+        <div class="reflection-a">${escHtml(ref.avoided)}</div>`;
+      }
+      if (ref.grateful) {
+        out += `<div class="reflection-q">What am I grateful for that I didn't create?</div>
+        <div class="reflection-a">${escHtml(ref.grateful)}</div>`;
+      }
+      if (checkins.length) {
+        out += `<div class="reflection-checkins">`;
+        checkins.forEach(c => {
+          out += `<div class="reflection-checkin">${c.time} \u2014 ${escHtml(c.label)}</div>`;
+        });
+        out += `</div>`;
+      }
+      if (hasWI) {
+        if (wi.pattern) {
+          out += `<div class="reflection-q reflection-q-wi">What pattern kept showing up this week?</div>
+          <div class="reflection-a">${escHtml(wi.pattern)}</div>`;
+        }
+        if (wi.learning) {
+          out += `<div class="reflection-q">What am I learning about myself that I didn\u2019t expect?</div>
+          <div class="reflection-a">${escHtml(wi.learning)}</div>`;
+        }
+        if (wi.carryForward) {
+          out += `<div class="reflection-q">What do I want to carry into next week?</div>
+          <div class="reflection-a">${escHtml(wi.carryForward)}</div>`;
+        }
+      }
+      out += `</div>`;
+    });
+
+    if (!out) out = `<div class="journal-card" style="color:var(--text-tertiary);text-align:center;">${logoSVG('logo-empty')}No reflections yet.</div>`;
+    list.innerHTML = out;
+  }
+
+  renderList('');
+  document.getElementById('reflection-search').addEventListener('input', (e) => {
+    document.querySelectorAll('.theme-tag').forEach(t => t.classList.remove('active'));
+    renderList(e.target.value);
+  });
+
+  // Theme tag click → filter
+  document.querySelectorAll('.theme-tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      const word = tag.dataset.theme;
+      const searchInput = document.getElementById('reflection-search');
+      const isActive = tag.classList.contains('active');
+      document.querySelectorAll('.theme-tag').forEach(t => t.classList.remove('active'));
+      if (isActive) {
+        searchInput.value = '';
+        renderList('');
+      } else {
+        tag.classList.add('active');
+        searchInput.value = word;
+        renderList(word);
+      }
+    });
+  });
+}
+
+// ── KEYBOARD SHORTCUTS ──
+document.addEventListener('keydown', (e) => {
+  if (activeView !== 'daily') return;
+  const target = e.target;
+  const inInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+  if (e.key === 'e' && !inInput) {
+    e.preventDefault();
+    const el = document.getElementById('checkin-input');
+    if (el) el.focus();
+    return;
+  }
+  if (e.key === 't' && !inInput) {
+    viewDate = todayStr();
+    render();
+    return;
+  }
+  if (e.key === 'ArrowLeft' && !inInput) {
+    viewDate = addDays(viewDate, -1);
+    render();
+    return;
+  }
+  if (e.key === 'ArrowRight' && !inInput) {
+    viewDate = addDays(viewDate, 1);
+    render();
+    return;
+  }
+
+  if (inInput) return;
+
+  const morningKeys = ['noPhone','coldExposure','breathwork','meditation','journaling','philosophyRead'];
+  const eveningKeys = ['dailyReview','bodyScan'];
+
+  if (e.key >= '1' && e.key <= '6') {
+    if (isFuture(viewDate)) return;
+    ensureDay(viewDate);
+    const key = morningKeys[parseInt(e.key) - 1];
+    commit(s => { s.days[viewDate].morning[key] = !s.days[viewDate].morning[key]; });
+  }
+  if (e.key === '7' || e.key === '8') {
+    if (isFuture(viewDate)) return;
+    ensureDay(viewDate);
+    const key = eveningKeys[parseInt(e.key) - 7];
+    commit(s => { s.days[viewDate].evening[key] = !s.days[viewDate].evening[key]; });
+  }
+});
+
+// ── UTIL ──
+function debounce(fn, ms) {
+  let t;
+  return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
