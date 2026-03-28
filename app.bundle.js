@@ -268,6 +268,47 @@
   function setState(s) {
     state = s;
   }
+  function normalizeCheckin(entry) {
+    if (typeof entry === "string") {
+      const label2 = entry.trim();
+      return label2 ? { time: "", label: label2 } : null;
+    }
+    const raw = entry && typeof entry === "object" ? entry : {};
+    const label = [raw.label, raw.word, raw.text, raw.value].find((value) => typeof value === "string" && value.trim());
+    if (!label) return null;
+    const time = [raw.time, raw.at, raw.timestamp].find((value) => typeof value === "string" && value.trim()) || "";
+    return { time: time.trim(), label: label.trim() };
+  }
+  function normalizeDayRecord(dayValue, dateStr) {
+    const raw = dayValue && typeof dayValue === "object" ? dayValue : {};
+    const dow = dateFromStr(dateStr).getDay();
+    const practice = getTodayPractice(dow);
+    const weeklyPractice = raw.weeklyPractice && typeof raw.weeklyPractice === "object" ? raw.weeklyPractice : {};
+    const eveningReflection = raw.eveningReflection && typeof raw.eveningReflection === "object" ? raw.eveningReflection : {};
+    const weeklyIntegration = raw.weeklyIntegration && typeof raw.weeklyIntegration === "object" ? raw.weeklyIntegration : null;
+    const checkinsSource = Array.isArray(raw.emotionalCheckins) ? raw.emotionalCheckins : Array.isArray(raw.checkins) ? raw.checkins : [];
+    return {
+      ...raw,
+      morning: raw.morning && typeof raw.morning === "object" ? raw.morning : {},
+      evening: raw.evening && typeof raw.evening === "object" ? raw.evening : {},
+      _ritualKeys: raw._ritualKeys && typeof raw._ritualKeys === "object" ? raw._ritualKeys : void 0,
+      emotionalCheckins: checkinsSource.map(normalizeCheckin).filter(Boolean),
+      eveningReflection: {
+        reacted: typeof eveningReflection.reacted === "string" ? eveningReflection.reacted : "",
+        avoided: typeof eveningReflection.avoided === "string" ? eveningReflection.avoided : "",
+        grateful: typeof eveningReflection.grateful === "string" ? eveningReflection.grateful : ""
+      },
+      weeklyPractice: {
+        completed: !!weeklyPractice.completed,
+        type: typeof weeklyPractice.type === "string" && weeklyPractice.type.trim() ? weeklyPractice.type : practice.type
+      },
+      weeklyIntegration: dow === 0 || weeklyIntegration ? {
+        pattern: typeof weeklyIntegration?.pattern === "string" ? weeklyIntegration.pattern : "",
+        learning: typeof weeklyIntegration?.learning === "string" ? weeklyIntegration.learning : "",
+        carryForward: typeof weeklyIntegration?.carryForward === "string" ? weeklyIntegration.carryForward : ""
+      } : void 0
+    };
+  }
   function normalizeStateShape(rawState) {
     const next = rawState && typeof rawState === "object" ? rawState : {};
     next.startDate = normalizeDateStr(next.startDate) || todayStr();
@@ -276,9 +317,13 @@
     Object.entries(next.days).forEach(([rawDate, dayValue]) => {
       const normalizedDate = normalizeDateStr(rawDate);
       if (!normalizedDate) return;
-      normalizedDays[normalizedDate] = dayValue;
+      normalizedDays[normalizedDate] = normalizeDayRecord(dayValue, normalizedDate);
     });
     next.days = normalizedDays;
+    const earliestSavedDay = Object.keys(next.days).sort()[0];
+    if (earliestSavedDay && earliestSavedDay < next.startDate) {
+      next.startDate = earliestSavedDay;
+    }
     if (!next.monthlyChallenges || typeof next.monthlyChallenges !== "object") next.monthlyChallenges = {};
     for (let i = 1; i <= 12; i++) {
       const month = next.monthlyChallenges[i] || {};

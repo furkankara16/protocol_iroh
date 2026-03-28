@@ -62,6 +62,32 @@ describe('normalizeStateShape', () => {
     expect(normalized.reading.books[0].startDate).toBe('2026-03-28');
     expect(normalized.reading.books[0].endDate).toBe('2026-04-02');
   });
+
+  it('pulls protocol start date back to the earliest saved day and normalizes legacy checkins', () => {
+    const normalized = normalizeStateShape({
+      startDate: '2026-03-28',
+      days: {
+        '2026-03-26': {
+          checkins: [
+            'grateful',
+            { word: 'peaceful', at: '20:14' }
+          ]
+        },
+        '2026-03-27': {
+          emotionalCheckins: [{ label: 'warm', time: '21:15' }]
+        }
+      }
+    });
+
+    expect(normalized.startDate).toBe('2026-03-26');
+    expect(normalized.days['2026-03-26'].emotionalCheckins).toEqual([
+      { time: '', label: 'grateful' },
+      { time: '20:14', label: 'peaceful' }
+    ]);
+    expect(normalized.days['2026-03-27'].emotionalCheckins).toEqual([
+      { time: '21:15', label: 'warm' }
+    ]);
+  });
 });
 
 describe('getDayCompletion', () => {
