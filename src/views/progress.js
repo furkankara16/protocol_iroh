@@ -3,7 +3,7 @@ import {
   monthContext,
   monthlyChallenges,
   trainingFocus,
-  emotionQuadrantMap,
+  getEmotionQuadrant,
   QUADRANT_LABELS,
   QUADRANT_COLORS,
   QUADRANT_Y_RATIOS
@@ -218,7 +218,7 @@ export function renderProgress(app) {
     dd.emotionalCheckins.forEach((ci, i) => {
       const word = (ci.label || '').trim().toLowerCase();
       if (!word) return;
-      const qi = emotionQuadrantMap.hasOwnProperty(word) ? emotionQuadrantMap[word] : -1;
+      const qi = getEmotionQuadrant(ci.label);
       emotionPoints.push({ date: ds, word: ci.label || word, time: ci.time || '', quadrant: qi, idx: i });
       if (qi >= 0) quadrantCounts[qi]++;
     });
@@ -233,8 +233,8 @@ export function renderProgress(app) {
       <div class="progress-card-aside">${emotionPoints.length} check-in${emotionPoints.length === 1 ? '' : 's'}</div>
     </div>`;
 
-  if (emotionPoints.length < 2) {
-    html += `<div class="no-data-note">Log a few emotional check-ins to see your pattern emerge here.</div>`;
+  if (!emotionPoints.length) {
+    html += `<div class="no-data-note">Log an emotional check-in to see your pattern emerge here.</div>`;
   } else {
     // SVG scatter chart
     const TL_W = 600, TL_H = 180;

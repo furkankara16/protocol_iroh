@@ -150,6 +150,26 @@
       emotionQuadrantMap[w.toLowerCase()] = qi;
     });
   });
+  function getEmotionQuadrant(value) {
+    const raw = String(value || "").trim().toLowerCase();
+    if (!raw) return -1;
+    if (Object.prototype.hasOwnProperty.call(emotionQuadrantMap, raw)) {
+      return emotionQuadrantMap[raw];
+    }
+    const segments = raw.split(/[;,/]+/).map((part) => part.trim()).filter(Boolean);
+    for (const segment of segments) {
+      if (Object.prototype.hasOwnProperty.call(emotionQuadrantMap, segment)) {
+        return emotionQuadrantMap[segment];
+      }
+    }
+    const tokens = raw.match(/[a-z']+/g) || [];
+    for (const token of tokens) {
+      if (Object.prototype.hasOwnProperty.call(emotionQuadrantMap, token)) {
+        return emotionQuadrantMap[token];
+      }
+    }
+    return -1;
+  }
   var meditationProgression = {
     1: { technique: "focused attention", description: "Count each exhale from 1 to 10, then start over. When you lose count, begin again at 1. The practice is the returning, not the counting." },
     2: { technique: "body-anchored awareness", description: "Rest attention on physical sensations \u2014 the weight of your hands, the rhythm of breath in your chest. When the mind pulls away, return to the body. You\u2019re building a home base." },
@@ -1500,7 +1520,7 @@
       dd.emotionalCheckins.forEach((ci, i) => {
         const word = (ci.label || "").trim().toLowerCase();
         if (!word) return;
-        const qi = emotionQuadrantMap.hasOwnProperty(word) ? emotionQuadrantMap[word] : -1;
+        const qi = getEmotionQuadrant(ci.label);
         emotionPoints.push({ date: ds, word: ci.label || word, time: ci.time || "", quadrant: qi, idx: i });
         if (qi >= 0) quadrantCounts[qi]++;
       });
@@ -1513,8 +1533,8 @@
       </div>
       <div class="progress-card-aside">${emotionPoints.length} check-in${emotionPoints.length === 1 ? "" : "s"}</div>
     </div>`;
-    if (emotionPoints.length < 2) {
-      html += `<div class="no-data-note">Log a few emotional check-ins to see your pattern emerge here.</div>`;
+    if (!emotionPoints.length) {
+      html += `<div class="no-data-note">Log an emotional check-in to see your pattern emerge here.</div>`;
     } else {
       let tlXPos = function(ds) {
         return TL_PAD.l + (dateFromStr(ds).getTime() - startMs) / rangeMs * plotW;

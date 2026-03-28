@@ -89,6 +89,30 @@ emotionWords.forEach((group, qi) => {
   group.words.forEach(w => { emotionQuadrantMap[w.toLowerCase()] = qi; });
 });
 
+export function getEmotionQuadrant(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return -1;
+  if (Object.prototype.hasOwnProperty.call(emotionQuadrantMap, raw)) {
+    return emotionQuadrantMap[raw];
+  }
+
+  const segments = raw.split(/[;,/]+/).map(part => part.trim()).filter(Boolean);
+  for (const segment of segments) {
+    if (Object.prototype.hasOwnProperty.call(emotionQuadrantMap, segment)) {
+      return emotionQuadrantMap[segment];
+    }
+  }
+
+  const tokens = raw.match(/[a-z']+/g) || [];
+  for (const token of tokens) {
+    if (Object.prototype.hasOwnProperty.call(emotionQuadrantMap, token)) {
+      return emotionQuadrantMap[token];
+    }
+  }
+
+  return -1;
+}
+
 export const meditationProgression = {
   1: { technique: "focused attention", description: "Count each exhale from 1 to 10, then start over. When you lose count, begin again at 1. The practice is the returning, not the counting." },
   2: { technique: "body-anchored awareness", description: "Rest attention on physical sensations \u2014 the weight of your hands, the rhythm of breath in your chest. When the mind pulls away, return to the body. You\u2019re building a home base." },
