@@ -1,10 +1,10 @@
 # Protocol Iroh
 
-Protocol Iroh is a single-page personal practice tracker built as a static HTML app. It stores all user data in the browser with `localStorage` under the key `iroh_protocol_data`, so each person using the site keeps their own private copy on their own device.
+Protocol Iroh is a static client-side personal practice tracker. The app source now uses native ES modules under `src/` with Vite for local development, production builds, and test tooling, while all user data still stays in the browser under `localStorage` key `iroh_protocol_data`.
 
 ## Publish On GitHub Pages
 
-This project is already set up for GitHub Pages with a workflow in [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+This project is already set up for GitHub Pages with a workflow in [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml). The workflow installs dependencies, builds the site with Vite, and publishes `dist/`.
 
 1. Create a new GitHub repository.
 2. Upload the contents of this folder to the repository root.
@@ -19,9 +19,21 @@ This project is already set up for GitHub Pages with a workflow in [`.github/wor
 
 - Data is not shared between users. Each browser keeps its own `localStorage`.
 - Data does not automatically sync across devices.
-- Clearing browser storage or switching browsers/devices will lose that local data unless you add an export/import flow later.
+- Clearing browser storage or switching browsers/devices will lose that local data unless you use the built-in export/import flow.
 - Book covers and descriptions require internet access because the app fetches metadata from external services.
 
 ## Local Use
 
-You can still open `index.html` directly in a browser for local use, but GitHub Pages is the easiest way to share the app with someone else through a stable URL.
+Install dependencies and run the app locally with Vite:
+
+1. Run `npm install`
+2. Run `npm run dev`
+3. Open the local URL Vite prints in the terminal
+
+You can also build a production version with `npm run build`, which writes a deployable site to `dist/`.
+
+If you prefer opening `index.html` directly from your filesystem, the repo also keeps a fallback `app.bundle.js` for `file://` use. After changing source files in `src/`, run `npm run bundle:file` or `npm run build` to refresh that local-open bundle.
+
+## Testing
+
+- Run `npm test` to execute the Vitest suite for the extracted pure helpers and state normalization logic.

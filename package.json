@@ -1,0 +1,18 @@
+{
+  "name": "iroh-protocol",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bundle:file": "node ./scripts/build-file-bundle.mjs",
+    "dev": "vite",
+    "build": "npm run bundle:file && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
+  }
+}
