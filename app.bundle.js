@@ -1447,7 +1447,7 @@
           else if (comp.rate < 1) level = "level-3";
           else level = "level-4";
           const tip = `${formatDateShort(ds)} \u2014 ${comp.completed}/${comp.total} completed`;
-          html += `<div class="heatmap-cell ${level}"><div class="heatmap-tooltip">${tip}</div></div>`;
+          html += `<div class="heatmap-cell ${level}" data-tip="${escHtml(tip)}" aria-label="${escHtml(tip)}"></div>`;
         } else {
           html += `<div class="heatmap-cell"></div>`;
         }
@@ -1456,7 +1456,7 @@
       html += `</div>`;
       if (cur > todayDate) break;
     }
-    html += `</div></div></div>`;
+    html += `</div></div><div class="heatmap-tooltip-floating" id="heatmap-tooltip-floating"></div></div>`;
     let currentStreak = 0, longestStreak = 0, tempStreak = 0;
     let checkDate = new Date(todayDate);
     while (true) {
@@ -1953,19 +1953,68 @@
       });
     }
     primeBookMetadataLookups(getReadingBooks().map((book) => book.id));
-    document.querySelectorAll(".heatmap-cell").forEach((cell) => {
-      cell.addEventListener("click", (e) => {
-        const wasActive = cell.classList.contains("tapped");
-        document.querySelectorAll(".heatmap-cell.tapped").forEach((c) => c.classList.remove("tapped"));
-        if (!wasActive) cell.classList.add("tapped");
-        e.stopPropagation();
+    const heatmapTooltip = document.getElementById("heatmap-tooltip-floating");
+    const heatmapCells = document.querySelectorAll(".heatmap-cell[data-tip]");
+    if (heatmapTooltip && heatmapCells.length) {
+      const hideHeatmapTooltip = () => {
+        heatmapTooltip.classList.remove("visible");
+        heatmapTooltip.removeAttribute("data-placement");
+      };
+      const showHeatmapTooltip = (cell) => {
+        const tip = cell?.dataset?.tip;
+        if (!tip) {
+          hideHeatmapTooltip();
+          return;
+        }
+        heatmapTooltip.textContent = tip;
+        heatmapTooltip.classList.add("visible");
+        const rect = cell.getBoundingClientRect();
+        const tipRect = heatmapTooltip.getBoundingClientRect();
+        const margin = 10;
+        const fitsAbove = rect.top >= tipRect.height + 18;
+        const placement = fitsAbove ? "top" : "bottom";
+        const top = fitsAbove ? rect.top - tipRect.height - 10 : rect.bottom + 10;
+        const idealLeft = rect.left + rect.width / 2 - tipRect.width / 2;
+        const maxLeft = Math.max(margin, window.innerWidth - tipRect.width - margin);
+        const left = Math.max(margin, Math.min(maxLeft, idealLeft));
+        heatmapTooltip.dataset.placement = placement;
+        heatmapTooltip.style.top = `${Math.max(margin, top)}px`;
+        heatmapTooltip.style.left = `${left}px`;
+      };
+      heatmapCells.forEach((cell) => {
+        cell.addEventListener("mouseenter", () => showHeatmapTooltip(cell));
+        cell.addEventListener("mousemove", () => showHeatmapTooltip(cell));
+        cell.addEventListener("mouseleave", () => {
+          if (!cell.classList.contains("tapped")) hideHeatmapTooltip();
+        });
+        cell.addEventListener("click", (e) => {
+          const wasActive = cell.classList.contains("tapped");
+          heatmapCells.forEach((c) => c.classList.remove("tapped"));
+          if (wasActive) {
+            hideHeatmapTooltip();
+          } else {
+            cell.classList.add("tapped");
+            showHeatmapTooltip(cell);
+          }
+          e.stopPropagation();
+        });
       });
-    });
-    if (!renderProgress._clickBound) {
-      renderProgress._clickBound = true;
-      document.addEventListener("click", () => {
-        document.querySelectorAll(".heatmap-cell.tapped").forEach((c) => c.classList.remove("tapped"));
-      });
+      if (!renderProgress._clickBound) {
+        renderProgress._clickBound = true;
+        document.addEventListener("click", () => {
+          document.querySelectorAll(".heatmap-cell.tapped").forEach((c) => c.classList.remove("tapped"));
+          hideHeatmapTooltip();
+        });
+        window.addEventListener("scroll", () => {
+          const activeCell = document.querySelector(".heatmap-cell.tapped");
+          if (activeCell) showHeatmapTooltip(activeCell);
+        }, true);
+        window.addEventListener("resize", () => {
+          const activeCell = document.querySelector(".heatmap-cell.tapped");
+          if (activeCell) showHeatmapTooltip(activeCell);
+          else hideHeatmapTooltip();
+        });
+      }
     }
   }
 
