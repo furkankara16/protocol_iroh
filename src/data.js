@@ -1,6 +1,8 @@
 // ── DATA CONSTANTS ──
 // All static data, schemas, and configuration used across the app.
 
+import { normalizeDateStr } from './utils.js';
+
 export const STORAGE_KEY = 'iroh_protocol_data';
 
 export const monthContext = {
@@ -169,8 +171,8 @@ export function normalizeReadingBook(book, fallbackId) {
     translation: typeof book.translation === 'string' ? book.translation : null,
     months: typeof book.months === 'string' ? book.months : '',
     instruction: typeof book.instruction === 'string' ? book.instruction : '',
-    startDate: typeof book.startDate === 'string' ? book.startDate : '',
-    endDate: typeof book.endDate === 'string' ? book.endDate : ''
+    startDate: normalizeDateStr(book.startDate) || '',
+    endDate: normalizeDateStr(book.endDate) || ''
   };
 }
 

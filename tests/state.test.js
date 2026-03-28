@@ -39,6 +39,29 @@ describe('normalizeStateShape', () => {
     expect(normalized.reading.bookMeta[99]).toBeUndefined();
     expect(ids).toContain(normalized.reading.currentBook);
   });
+
+  it('normalizes legacy date strings so progress range filters still include saved days', () => {
+    const normalized = normalizeStateShape({
+      startDate: '2026-3-28',
+      days: {
+        '2026-3-28': {
+          morning: {},
+          evening: {},
+          emotionalCheckins: [{ time: '20:59', label: 'grateful' }],
+          eveningReflection: { reacted: '', avoided: '', grateful: '' },
+          weeklyPractice: { completed: false, type: 'solitude' }
+        }
+      },
+      reading: {
+        books: [{ id: 1, title: 'Test', author: 'Author', startDate: '2026-3-28', endDate: '2026-4-2' }]
+      }
+    });
+
+    expect(normalized.startDate).toBe('2026-03-28');
+    expect(Object.keys(normalized.days)).toEqual(['2026-03-28']);
+    expect(normalized.reading.books[0].startDate).toBe('2026-03-28');
+    expect(normalized.reading.books[0].endDate).toBe('2026-04-02');
+  });
 });
 
 describe('getDayCompletion', () => {

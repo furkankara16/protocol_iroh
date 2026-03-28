@@ -8,6 +8,19 @@
     const [y, m, d] = s.split("-").map(Number);
     return new Date(y, m - 1, d);
   }
+  function normalizeDateStr(value) {
+    if (typeof value !== "string") return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (!match) return "";
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return "";
+    if (month < 1 || month > 12 || day < 1 || day > 31) return "";
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
   function formatDateLong(s) {
     const d = dateFromStr(s);
     return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -220,8 +233,8 @@
       translation: typeof book.translation === "string" ? book.translation : null,
       months: typeof book.months === "string" ? book.months : "",
       instruction: typeof book.instruction === "string" ? book.instruction : "",
-      startDate: typeof book.startDate === "string" ? book.startDate : "",
-      endDate: typeof book.endDate === "string" ? book.endDate : ""
+      startDate: normalizeDateStr(book.startDate) || "",
+      endDate: normalizeDateStr(book.endDate) || ""
     };
   }
   function createDefaultReadingBooks() {
@@ -257,7 +270,15 @@
   }
   function normalizeStateShape(rawState) {
     const next = rawState && typeof rawState === "object" ? rawState : {};
+    next.startDate = normalizeDateStr(next.startDate) || todayStr();
     if (!next.days || typeof next.days !== "object") next.days = {};
+    const normalizedDays = {};
+    Object.entries(next.days).forEach(([rawDate, dayValue]) => {
+      const normalizedDate = normalizeDateStr(rawDate);
+      if (!normalizedDate) return;
+      normalizedDays[normalizedDate] = dayValue;
+    });
+    next.days = normalizedDays;
     if (!next.monthlyChallenges || typeof next.monthlyChallenges !== "object") next.monthlyChallenges = {};
     for (let i = 1; i <= 12; i++) {
       const month = next.monthlyChallenges[i] || {};

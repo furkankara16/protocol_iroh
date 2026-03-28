@@ -11,6 +11,20 @@ export function dateFromStr(s) {
   return new Date(y, m-1, d);
 }
 
+export function normalizeDateStr(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!match) return '';
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return '';
+  if (month < 1 || month > 12 || day < 1 || day > 31) return '';
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
 export function formatDateLong(s) {
   const d = dateFromStr(s);
   return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });

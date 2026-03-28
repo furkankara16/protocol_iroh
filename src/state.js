@@ -2,7 +2,7 @@
 // Persistent state, localStorage I/O, state normalization,
 // book metadata pipeline, and the commit() mutation helper.
 
-import { dateFromStr } from './utils.js';
+import { dateFromStr, normalizeDateStr, todayStr } from './utils.js';
 import {
   STORAGE_KEY, readingList, DEFAULT_MORNING_TEMPLATE, DEFAULT_EVENING_TEMPLATE,
   normalizeRitualItem, normalizeReadingBook, createDefaultReadingBooks,
@@ -19,7 +19,15 @@ export function setState(s) { state = s; }
 // ── NORMALIZE ──
 export function normalizeStateShape(rawState) {
   const next = rawState && typeof rawState === 'object' ? rawState : {};
+  next.startDate = normalizeDateStr(next.startDate) || todayStr();
   if (!next.days || typeof next.days !== 'object') next.days = {};
+  const normalizedDays = {};
+  Object.entries(next.days).forEach(([rawDate, dayValue]) => {
+    const normalizedDate = normalizeDateStr(rawDate);
+    if (!normalizedDate) return;
+    normalizedDays[normalizedDate] = dayValue;
+  });
+  next.days = normalizedDays;
   if (!next.monthlyChallenges || typeof next.monthlyChallenges !== 'object') next.monthlyChallenges = {};
   for (let i = 1; i <= 12; i++) {
     const month = next.monthlyChallenges[i] || {};
