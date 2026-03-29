@@ -70,17 +70,20 @@ h3 { font-size: 13px; font-weight: 400; color: var(--text-secondary); }
   background: rgba(15,15,15,0.92);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  display: flex; justify-content: center; align-items: center; gap: 28px;
-  padding: 8px 24px 0;
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0 28px;
+  padding: 12px 24px 2px;
 }
 .nav-brand {
-  margin-right: auto;
+  width: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
   min-width: 0;
   color: var(--accent);
   cursor: pointer;
+  padding-bottom: 8px;
+  text-align: center;
 }
 .nav-tab {
   background: none; border: none; border-bottom: 2px solid transparent;
@@ -921,18 +924,17 @@ textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
   .content { padding: 24px 16px 60px; }
   body { font-size: 12px; }
   .nav {
-    flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 0 18px;
-    padding: 8px 16px 0;
+    padding: 10px 16px 2px;
   }
   .nav-brand {
     width: 100%;
-    margin-right: 0;
-    padding-bottom: 4px;
+    justify-content: center;
+    padding-bottom: 6px;
   }
-  .logo-nav { width: 48px; height: 54px; }
-  .nav-wordmark { font-size: 19px; }
+  .logo-nav { width: 60px; height: 68px; }
+  .nav-wordmark { font-size: 22px; }
   .week-col { min-width: 60px; padding: 8px 4px; }
   .view-title-row,
   .journal-card-header {
@@ -960,8 +962,10 @@ textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
 
 @media (max-width: 480px) {
   .content { padding: 16px 12px 56px; }
-  .nav { gap: 0 12px; padding: 6px 12px 0; }
-  .nav-wordmark { display: none; }
+  .nav { gap: 0 12px; padding: 8px 12px 2px; }
+  .nav-brand { gap: 10px; padding-bottom: 5px; }
+  .logo-nav { width: 44px; height: 50px; }
+  .nav-wordmark { display: block; font-size: 16px; letter-spacing: 0.12em; }
   .week-col { min-width: 44px; padding: 6px 2px; font-size: 10px; }
   .week-day { font-size: 11px; }
   .week-stat { font-size: 10px; }
@@ -1168,15 +1172,15 @@ textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .logo-nav {
-  width: 54px; height: 60px;
+  width: 72px; height: 80px;
   flex-shrink: 0;
   opacity: 0.6;
   transition: opacity 0.2s ease;
 }
 .nav-wordmark {
   color: var(--accent);
-  font-size: 21px;
-  letter-spacing: 0.16em;
+  font-size: 28px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
   opacity: 0.8;
